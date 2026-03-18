@@ -1,0 +1,3 @@
+C:/Users/lufeo/OneDrive/Documentos/Estudos Dev/C++/roguelike/build/CMakeFiles/roguelike.dir
+C:/Users/lufeo/OneDrive/Documentos/Estudos Dev/C++/roguelike/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/lufeo/OneDrive/Documentos/Estudos Dev/C++/roguelike/build/CMakeFiles/ZERO_CHECK.dir
