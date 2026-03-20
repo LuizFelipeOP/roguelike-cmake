@@ -2,6 +2,7 @@
 
 #include "core/Game.hpp"
 #include <iostream>
+#include <ctime>    // time() — para seed aleatória baseada no relógio
 
 #ifdef _WIN32
     #include <conio.h>   // _getch() — lê tecla sem precisar apertar Enter (Windows)
@@ -30,11 +31,19 @@ static char readKey() {
 
 Game::Game()
     : isRunning_(true)
-    , map_(40, 20)        // Mapa 40 colunas x 20 linhas
-    , player_(2, 2)       // Jogador começa na posição (2,2) — dentro das paredes
+    , map_(60, 22)        // Mapa maior para caber mais salas
+    , player_(2, 2)       // Posição inicial fixa — será ajustada após generate()
     , renderer_()
 {
-    // Aqui futuramente inicializaremos inimigos, itens, etc.
+    // Gera o dungeon com uma seed baseada no tempo — mapa diferente a cada execução
+    // Na Fase 7 (persistência) vamos salvar a seed para recriar o mesmo dungeon
+    map_.generate(static_cast<unsigned int>(time(nullptr)));
+
+    // Posiciona o jogador no centro da primeira sala gerada
+    if (!map_.getRooms().empty()) {
+        Point start = map_.getRooms().front().center();
+        player_ = Player(start.x, start.y);
+    }
 }
 
 void Game::run() {

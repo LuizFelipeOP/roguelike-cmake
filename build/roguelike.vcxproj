@@ -341,6 +341,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\entities\Player.cpp" />
     <ClCompile Include="C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\main.cpp" />
     <ClCompile Include="C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\map\Map.cpp" />
+    <ClCompile Include="C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\map\Room.cpp" />
     <ClCompile Include="C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\ui\Renderer.cpp" />
   </ItemGroup>
   <ItemGroup />

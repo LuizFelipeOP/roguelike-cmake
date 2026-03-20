@@ -31,8 +31,16 @@ void Player::move(int dx, int dy, Map& map) {
         y_ = newY;
     }
 }
-
+//logica de receber dano
+void Player::takeDamage(int amount){
+    hp_ = hp_ - std::max(1, amount - defense_);
+}
+//logica de saber se player esta vivo
+bool Player::isAlive(){
+    return hp_ > 0;
+}
 int Player::getHp()      const { return hp_; }
 int Player::getMaxHp()   const { return maxHp_; }
 int Player::getAttack()  const { return attack_; }
 int Player::getDefense() const { return defense_; }
+

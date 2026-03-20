@@ -34,6 +34,9 @@ public:
     int getAttack()  const;
     int getDefense() const;
 
+    void takeDamage(int amount);
+    bool isAlive();
+
 private:
     int hp_;       // Vida atual
     int maxHp_;    // Vida máxima
