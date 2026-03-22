@@ -3,10 +3,10 @@
 #include "Enemy.hpp"
 #include "Player.hpp"
 
-class Goblin : public Enemy {
+class Troll : public Enemy {
 public:
     // Construtor: posição inicial + atributos base
-    Goblin(int x, int y);
+    Troll(int x, int y);
 
     void update(Map& map, Player& player) override;
 

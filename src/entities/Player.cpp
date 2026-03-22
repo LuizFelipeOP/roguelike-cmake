@@ -36,7 +36,7 @@ void Player::takeDamage(int amount){
     hp_ = hp_ - std::max(1, amount - defense_);
 }
 //logica de saber se player esta vivo
-bool Player::isAlive(){
+bool Player::isAlive() const {
     return hp_ > 0;
 }
 int Player::getHp()      const { return hp_; }

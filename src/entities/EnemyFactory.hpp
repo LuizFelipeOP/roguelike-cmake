@@ -4,12 +4,12 @@
 class Map;
 class Player;
 
-class Enemy : public Entity {
+class EnemyFactory : public Entity {
 public:
     // Construtor: posição inicial + atributos base
-    Enemy(int x, int y, int hp, int attack, int defense);
+    EnemyFactory(int x, int y, int hp, int attack, int defense);
 
-    virtual ~Enemy() = default;
+    virtual ~EnemyFactory() = default;
 
     void update() override;
 

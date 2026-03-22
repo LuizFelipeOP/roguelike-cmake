@@ -1,16 +1,16 @@
-#include "Goblin.hpp"
+#include "Troll.hpp"
 #include "Player.hpp"
 #include "map/Map.hpp"
 #include <algorithm> 
 
-Goblin::Goblin(int x, int y)
-    :Enemy(x, y, 6, 3, 1)
+Troll::Troll(int x, int y)
+    :Enemy(x, y, 12, 5, 3)
 {
-    symbol_ = 'g';
+    symbol_ = 'T';
 }
 
 
-void Goblin::update(Map& map, Player& player) {
+void Troll::update(Map& map, Player& player) {
     int playerX = player.getX();
     int playerY = player.getY();
 

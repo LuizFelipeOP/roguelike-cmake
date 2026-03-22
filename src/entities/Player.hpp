@@ -35,7 +35,7 @@ public:
     int getDefense() const;
 
     void takeDamage(int amount);
-    bool isAlive();
+    bool isAlive() const;
 
 private:
     int hp_;       // Vida atual
