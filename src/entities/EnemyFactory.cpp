@@ -4,7 +4,7 @@
 #include <algorithm> 
 
 EnemyFactory::EnemyFactory(int x, int y, int hp, int attack, int defense)
-    : Entity(x, y)          // Chama o construtor da classe pai (Entity)
+    : Enemy(x, y, hp, attack, defense)
     , hp_(hp)
     , attack_(attack)
     , defense_(defense)

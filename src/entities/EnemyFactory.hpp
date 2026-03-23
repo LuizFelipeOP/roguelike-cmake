@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Entity.hpp"
+#include "Enemy.hpp"
 class Map;
 class Player;
 
-class EnemyFactory : public Entity {
+class EnemyFactory : public Enemy {
 public:
     // Construtor: posição inicial + atributos base
     EnemyFactory(int x, int y, int hp, int attack, int defense);
