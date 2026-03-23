@@ -3,6 +3,10 @@
 #include "core/Game.hpp"
 #include <iostream>
 #include <ctime>    // time() — para seed aleatória baseada no relógio
+#include <random>
+#include <vector>
+#include <memory>
+#include "entities/EnemyFactory.hpp"
 
 #ifdef _WIN32
     #include <conio.h>   // _getch() — lê tecla sem precisar apertar Enter (Windows)
@@ -34,15 +38,30 @@ Game::Game()
     , map_(60, 22)        // Mapa maior para caber mais salas
     , player_(2, 2)       // Posição inicial fixa — será ajustada após generate()
     , renderer_()
+    , enemies_()            //vetor de ponteiros de inimigos
 {
     // Gera o dungeon com uma seed baseada no tempo — mapa diferente a cada execução
     // Na Fase 7 (persistência) vamos salvar a seed para recriar o mesmo dungeon
     map_.generate(static_cast<unsigned int>(time(nullptr)));
+    
+    //variaveis de aletoriedade do spawn de inimigos
+    std::mt19937 rng(static_cast<unsigned int>(time(nullptr)) + 1);
+    std::uniform_int_distribution<int> randType(0, 1);
 
     // Posiciona o jogador no centro da primeira sala gerada
     if (!map_.getRooms().empty()) {
         Point start = map_.getRooms().front().center();
         player_ = Player(start.x, start.y);
+
+        const std::vector rooms = map_.getRooms();
+        //começa na sala 1 (int i = 1) para pular a sala do jogador
+        for (int i = 1; i < rooms.size(); i++)
+        {
+            // pega o centro da room atual
+            Point centroRoom = rooms[i].center();
+            EnemyType tipo = (randType(rng) == 0) ? EnemyType::Goblin : EnemyType::Troll;
+            enemies_.push_back(EnemyFactory::create(tipo, centroRoom.x, centroRoom.y));
+        }
     }
 }
 
@@ -79,6 +98,12 @@ void Game::update() {
     // Por enquanto apenas atualiza o jogador
     // Na Fase 3 este método vai iterar por todos os inimigos também
     player_.update();
+
+    for (auto& enemy : enemies_) {
+        if(enemy->isAlive()){
+            enemy->update(map_, player_);
+        }
+    }
 }
 
 void Game::render() {

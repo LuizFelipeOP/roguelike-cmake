@@ -1,23 +1,17 @@
 #include "EnemyFactory.hpp"
-#include "map/Map.hpp"
-#include "Player.hpp"
-#include <algorithm> 
+#include <vector>
+#include <memory>
+#include "Goblin.hpp"
+#include "Troll.hpp"
 
-EnemyFactory::EnemyFactory(int x, int y, int hp, int attack, int defense)
-    : Enemy(x, y, hp, attack, defense)
-    , hp_(hp)
-    , attack_(attack)
-    , defense_(defense)
-{}
-
-//logica de receber dano
-void EnemyFactory::takeDamage(int amount){
-    hp_ = hp_ - std::max(1, amount - defense_);
+std::unique_ptr<Enemy> EnemyFactory::create(EnemyType type, int x, int y){
+    switch (type)
+    {
+    case EnemyType::Goblin: 
+        return std::make_unique<Goblin>(x, y);
+    case EnemyType::Troll: 
+        return std::make_unique<Troll>(x, y);    
+    default:
+        return nullptr;
+    }
 }
-//logica de saber se inimigo esta vivo
-bool EnemyFactory::isAlive() const { return hp_ > 0; }
-
-
-int EnemyFactory::getHp()      const { return hp_; }
-int EnemyFactory::getAttack()  const { return attack_; }
-int EnemyFactory::getDefense() const { return defense_; }

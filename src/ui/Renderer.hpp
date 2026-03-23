@@ -16,6 +16,7 @@
 
 #include "map/Map.hpp"
 #include "entities/Player.hpp"
+#include "entities/Enemy.hpp"
 
 class Renderer {
 public:
@@ -23,7 +24,7 @@ public:
 
     // render(): desenha o estado completo do jogo no console
     // Recebe o mapa e o jogador para saber o que desenhar
-    void render(const Map& map, const Player& player);
+    void render(const Map& map, const Player& player, const Enemy& enemy);
 
     // renderHUD(): desenha a barra de status (HP, nível, etc.)
     // HUD = Heads-Up Display — informações fixas na tela

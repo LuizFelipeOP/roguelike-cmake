@@ -11,10 +11,11 @@ public:
 
     virtual ~Enemy() = default;
 
-    void update() override;
+    // Satisfaz o contrato abstrato de Entity — inimigos não usam a versão sem argumento
+    void update() override {}
 
+    // IA do inimigo — chamada pelo Game a cada turno
     virtual void update(Map& map, Player& player) = 0;
-
 
     int getHp()      const;
     int getAttack()  const;

@@ -18,7 +18,7 @@ void Renderer::clearScreen() {
 #endif
 }
 
-void Renderer::render(const Map& map, const Player& player) {
+void Renderer::render(const Map& map, const Player& player, const Enemy& enemy) {
     clearScreen();
 
     // Iteramos o mapa linha por linha (y = linha, x = coluna)

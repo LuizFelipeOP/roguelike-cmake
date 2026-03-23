@@ -4,10 +4,22 @@
     <ClCompile Include="C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\core\Game.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\entities\Enemy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\entities\EnemyFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\entities\Entity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\entities\Goblin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\entities\Player.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\entities\Troll.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\main.cpp">

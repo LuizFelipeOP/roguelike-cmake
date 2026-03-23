@@ -14,6 +14,9 @@
 #include "entities/Player.hpp"
 #include "map/Map.hpp"
 #include "ui/Renderer.hpp"
+#include <vector>
+#include <memory>
+#include "entities/EnemyFactory.hpp"
 
 class Game {
 public:
@@ -33,6 +36,7 @@ private:
     Map      map_;
     Player   player_;
     Renderer renderer_;
+    std::vector<std::unique_ptr<Enemy>> enemies_;
 
     // --- Etapas do loop ---
     // Separar em métodos privados deixa run() limpo e legível
