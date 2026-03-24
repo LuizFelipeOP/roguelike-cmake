@@ -6,8 +6,8 @@
 
 Player::Player(int x, int y)
     : Entity(x, y)          // Chama o construtor da classe pai (Entity)
-    , hp_(2)
-    , maxHp_(2)
+    , hp_(50)
+    , maxHp_(50)
     , attack_(5)
     , defense_(2)
 {

@@ -28,6 +28,10 @@ public:
     // Retorna a lista de salas geradas (útil para posicionar jogador/inimigos)
     const std::vector<Room>& getRooms() const;
 
+    //metodos do Fog of war
+    bool isExplored(int x, int y) const;
+    void updateVisibility(int px, int py);
+
 private:
     int width_;
     int height_;
@@ -45,4 +49,8 @@ private:
     // carveVerticalCorridor:   escava da linha y1 até y2 na coluna x
     void carveHorizontalCorridor(int x1, int x2, int y);
     void carveVerticalCorridor(int y1, int y2, int x);
+
+    //campo do Fog of war
+    std::vector<std::vector<bool>> explored_;
+    
 };

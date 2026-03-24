@@ -99,16 +99,18 @@ void Game::processInput() {
 }
 
 void Game::update() {
-    // Por enquanto apenas atualiza o jogador
-    // Na Fase 3 este método vai iterar por todos os inimigos também
+
     player_.update();
 
+    map_.updateVisibility(player_.getX(), player_.getY());
+    
     for (auto& enemy : enemies_) {
         if(enemy->isAlive()){
             enemy->update(map_, player_);
             
         }
     }
+    //limpar inimigos caso tenham morrido
     enemies_.erase(
         std::remove_if(enemies_.begin(), enemies_.end(),
             [](const std::unique_ptr<Enemy>& e) { 

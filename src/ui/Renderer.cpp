@@ -24,25 +24,32 @@ void Renderer::render(const Map& map, const Player& player, const std::vector<st
     // Iteramos o mapa linha por linha (y = linha, x = coluna)
     for (int y = 0; y < map.getHeight(); ++y) {
         for (int x = 0; x < map.getWidth(); ++x) {
-
+            
+            
             // Se a posição do jogador coincide com este tile, desenhamos o jogador
             if (x == player.getX() && y == player.getY()) {
                 std::cout << player.getSymbol();
                 continue;
             }
             
-            bool hadEnemy = false;
-            for (const auto& enemy : enemies) {
-                if(enemy->isAlive() && enemy->getX() == x && enemy->getY() == y){
-                    std::cout << enemy->getSymbol();
-                    hadEnemy = true;
-                    break;
-                }
+            if (map.isExplored(x, y)){
+                bool hadEnemy = false;
+                for (const auto& enemy : enemies) {
+                    if(enemy->isAlive() && enemy->getX() == x && enemy->getY() == y){
+                        std::cout << enemy->getSymbol();
+                        hadEnemy = true;
+                        break;
+                    }
 
+                }
+                if (!hadEnemy) {
+                    std::cout << map.getTile(x, y);
+                }
+            }else{
+                 std::cout << ' ';
+                 continue;
             }
-            if (!hadEnemy) {
-                std::cout << map.getTile(x, y);
-            }
+            
         }
         // Quebra de linha ao fim de cada linha do mapa
         std::cout << '\n';
