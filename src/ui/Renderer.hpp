@@ -24,7 +24,7 @@ public:
 
     // render(): desenha o estado completo do jogo no console
     // Recebe o mapa e o jogador para saber o que desenhar
-    void render(const Map& map, const Player& player, const Enemy& enemy);
+    void render(const Map& map, const Player& player, const std::vector<std::unique_ptr<Enemy>>& enemies);
 
     // renderHUD(): desenha a barra de status (HP, nível, etc.)
     // HUD = Heads-Up Display — informações fixas na tela

@@ -18,7 +18,7 @@ void Renderer::clearScreen() {
 #endif
 }
 
-void Renderer::render(const Map& map, const Player& player, const Enemy& enemy) {
+void Renderer::render(const Map& map, const Player& player, const std::vector<std::unique_ptr<Enemy>>& enemies) {
     clearScreen();
 
     // Iteramos o mapa linha por linha (y = linha, x = coluna)
@@ -26,17 +26,27 @@ void Renderer::render(const Map& map, const Player& player, const Enemy& enemy) 
         for (int x = 0; x < map.getWidth(); ++x) {
 
             // Se a posição do jogador coincide com este tile, desenhamos o jogador
-            // Caso contrário, desenhamos o tile do mapa
             if (x == player.getX() && y == player.getY()) {
                 std::cout << player.getSymbol();
-            } else {
+                continue;
+            }
+            
+            bool hadEnemy = false;
+            for (const auto& enemy : enemies) {
+                if(enemy->isAlive() && enemy->getX() == x && enemy->getY() == y){
+                    std::cout << enemy->getSymbol();
+                    hadEnemy = true;
+                    break;
+                }
+
+            }
+            if (!hadEnemy) {
                 std::cout << map.getTile(x, y);
             }
         }
         // Quebra de linha ao fim de cada linha do mapa
         std::cout << '\n';
     }
-
     // Desenha o HUD logo abaixo do mapa
     renderHUD(player);
 }

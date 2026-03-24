@@ -11,6 +11,9 @@
 //   - Implementação de update() (obrigatória por ser abstrata em Entity)
 
 #include "Entity.hpp"
+class Enemy;   // forward declaration
+#include <vector>
+#include <memory>
 
 class Player : public Entity {
 public:
@@ -26,7 +29,7 @@ public:
     // move(): tenta mover o jogador na direção (dx, dy)
     // Recebe o mapa para verificar se a posição é caminhável
     // Declaramos o Map com forward declaration abaixo para evitar include circular
-    void move(int dx, int dy, class Map& map);
+    void move(int dx, int dy, class Map& map, const std::vector<std::unique_ptr<Enemy>>& enemies);
 
     // Getters dos atributos do personagem
     int getHp()      const;

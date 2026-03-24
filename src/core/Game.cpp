@@ -7,6 +7,7 @@
 #include <vector>
 #include <memory>
 #include "entities/EnemyFactory.hpp"
+#include <algorithm> 
 
 #ifdef _WIN32
     #include <conio.h>   // _getch() — lê tecla sem precisar apertar Enter (Windows)
@@ -74,8 +75,11 @@ void Game::run() {
         processInput();  // 2. Espera e lê a ação do jogador
         update();        // 3. Atualiza o mundo em resposta à ação
     }
-
-    std::cout << "\nAté a próxima aventura!\n";
+    if (!player_.isAlive()) {
+        std::cout << "\nVoce morreu... Tente novamente!\n";
+    }else{
+        std::cout << "\nAté a próxima aventura!\n";
+    }
 }
 
 void Game::processInput() {
@@ -85,10 +89,10 @@ void Game::processInput() {
     key = static_cast<char>(tolower(key));
 
     switch (key) {
-        case 'w': player_.move( 0, -1, map_); break;  // cima
-        case 's': player_.move( 0,  1, map_); break;  // baixo
-        case 'a': player_.move(-1,  0, map_); break;  // esquerda
-        case 'd': player_.move( 1,  0, map_); break;  // direita
+        case 'w': player_.move( 0, -1, map_, enemies_); break;  // cima
+        case 's': player_.move( 0,  1, map_, enemies_); break;  // baixo
+        case 'a': player_.move(-1,  0, map_, enemies_); break;  // esquerda
+        case 'd': player_.move( 1,  0, map_, enemies_); break;  // direita
         case 'q': isRunning_ = false;          break;  // sair
         default: break;  // Tecla desconhecida — ignora, não faz nada
     }
@@ -102,10 +106,21 @@ void Game::update() {
     for (auto& enemy : enemies_) {
         if(enemy->isAlive()){
             enemy->update(map_, player_);
+            
         }
+    }
+    enemies_.erase(
+        std::remove_if(enemies_.begin(), enemies_.end(),
+            [](const std::unique_ptr<Enemy>& e) { 
+                return !e->isAlive(); 
+            }),
+        enemies_.end()
+    );
+    if (!player_.isAlive()) {
+        isRunning_ = false;
     }
 }
 
 void Game::render() {
-    renderer_.render(map_, player_);
+    renderer_.render(map_, player_, enemies_);
 }
