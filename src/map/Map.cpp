@@ -11,7 +11,12 @@
 // são paredes (#) e o resto é chão '.'
 Map::Map(int width, int height)
     : width_(width), height_(height) {
+
+    //inicializaçao de area total exploravel com '.'
     tiles_.assign(height, std::vector<char>(width, '.'));
+    
+    //inicializaçao de area explorada como tudo false
+    explored_.assign(height, std::vector<bool>(width, false));
     for (int y = 0; y < height_; ++y) {
         for (int x = 0; x < width_; ++x) {
             if (x == 0 || x == width_ - 1 || y == 0 || y == height_ - 1) {
@@ -19,6 +24,7 @@ Map::Map(int width, int height)
             }
         }
     }
+    
 }
 
 // Checa se o chão é '.', faz checagem de bounds antes
@@ -92,6 +98,8 @@ void Map::carveVerticalCorridor(int y1, int y2, int x) {
 void Map::generate(unsigned int seed) {
     rooms_.clear();
     fill('#');
+    for (auto& row : explored_)
+        std::fill(row.begin(), row.end(), false);
 
     //gerar sala espaço aleatorio para o jogo
     std::mt19937 rng(seed);
@@ -135,4 +143,35 @@ void Map::generate(unsigned int seed) {
         rooms_.push_back(Room(width_/2 - 3, height_/2 - 2, 6, 4));
         carveRoom(rooms_.back());
     }
+}
+void Map::updateVisibility(int px, int py){
+    for(auto& room : rooms_){
+        if(room.contains(px, py)){
+            explored_[py][px] = true;
+            for (int y = room.y; y < room.y + room.height; ++y) {
+                for (int x = room.x; x < room.x + room.width; ++x) {
+                    explored_[y][x] = true;
+                }
+            }
+            
+        }
+    }
+    //explora o raio de ação, aumenta a visibilidade do fog of war
+    for (int dy = -2; dy <= 2; ++dy) {
+        for (int dx = -2; dx <= 2; ++dx) {
+            int novoRaioX = px + dx;
+            int novoRaioY = py + dy;
+            if (novoRaioX >= 0 && novoRaioX < width_ && novoRaioY >= 0 && novoRaioY < height_) {
+                if (isWalkable(novoRaioX, novoRaioY))
+                    explored_[novoRaioY][novoRaioX] = true;
+            }
+        }
+    }
+    
+}
+
+bool Map::isExplored(int x, int y) const {
+    //valida se esta fora dos limites
+    if (x < 0 || x >= width_ || y < 0 || y >= height_) return false;
+    return explored_[y][x];
 }

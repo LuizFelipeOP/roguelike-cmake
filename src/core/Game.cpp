@@ -15,6 +15,7 @@
     #include <termios.h> // Para leitura de tecla sem Enter no Linux/Mac
     #include <unistd.h>
 #endif
+#include <string>
 
 // Função auxiliar: lê uma tecla sem aguardar Enter
 // Encapsula a diferença entre Windows e Linux
@@ -40,6 +41,7 @@ Game::Game()
     , player_(2, 2)       // Posição inicial fixa — será ajustada após generate()
     , renderer_()
     , enemies_()            //vetor de ponteiros de inimigos
+    , messageLog_()
 {
     // Gera o dungeon com uma seed baseada no tempo — mapa diferente a cada execução
     // Na Fase 7 (persistência) vamos salvar a seed para recriar o mesmo dungeon
@@ -54,6 +56,9 @@ Game::Game()
         Point start = map_.getRooms().front().center();
         player_ = Player(start.x, start.y);
 
+        //inicializar a visualização do mapa antes do jogador dar o primeiro input
+        map_.updateVisibility(player_.getX(), player_.getY());
+
         const std::vector rooms = map_.getRooms();
         //começa na sala 1 (int i = 1) para pular a sala do jogador
         for (int i = 1; i < rooms.size(); i++)
@@ -64,6 +69,8 @@ Game::Game()
             enemies_.push_back(EnemyFactory::create(tipo, centroRoom.x, centroRoom.y));
         }
     }
+
+    
 }
 
 void Game::run() {
@@ -99,16 +106,31 @@ void Game::processInput() {
 }
 
 void Game::update() {
-    // Por enquanto apenas atualiza o jogador
-    // Na Fase 3 este método vai iterar por todos os inimigos também
-    player_.update();
 
+    player_.update();
+            
+    //loop para o inimigo reagir quando o jogador consegue vê-lo
     for (auto& enemy : enemies_) {
         if(enemy->isAlive()){
-            enemy->update(map_, player_);
-            
+            if(map_.isExplored(enemy->getX(), enemy->getY())){
+                enemy->update(map_, player_);
+            }
         }
     }
+    //loop para jogador receber xp de inimigo derrotado
+    for (auto& enemy : enemies_) {
+        if(!enemy->isAlive()){
+            std::string mensagem = player_.addXP(enemy->getXPReward());
+            if(!mensagem.empty()){
+                pushMessage(mensagem);
+            }
+        }
+    }
+    //vialização do mapa pelo jogador
+    map_.updateVisibility(player_.getX(), player_.getY());
+
+
+    //limpar inimigos caso tenham morrido
     enemies_.erase(
         std::remove_if(enemies_.begin(), enemies_.end(),
             [](const std::unique_ptr<Enemy>& e) { 
@@ -122,5 +144,10 @@ void Game::update() {
 }
 
 void Game::render() {
-    renderer_.render(map_, player_, enemies_);
+    renderer_.render(map_, player_, enemies_, messageLog_);
+}
+
+void Game::pushMessage(const std::string& message) {
+    if(messageLog_.size() == 3) messageLog_.pop_front();
+    messageLog_.push_back(message);
 }

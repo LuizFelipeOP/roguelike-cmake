@@ -4,7 +4,7 @@
 #include <algorithm> 
 
 Troll::Troll(int x, int y)
-    :Enemy(x, y, 12, 5, 3)
+    :Enemy(x, y, 12, 5, 3, 25)
 {
     symbol_ = 'T';
 }
@@ -36,3 +36,4 @@ void Troll::update(Map& map, Player& player) {
         }
     }
 }
+int Troll::getXPReward(){ return getXP(); }

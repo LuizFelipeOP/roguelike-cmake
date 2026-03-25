@@ -4,7 +4,7 @@
 #include <algorithm> 
 
 Goblin::Goblin(int x, int y)
-    :Enemy(x, y, 6, 3, 1)
+    :Enemy(x, y, 6, 3, 1, 10)
 {
     symbol_ = 'g';
 }
@@ -36,3 +36,4 @@ void Goblin::update(Map& map, Player& player) {
         }
     }
 }
+int Goblin::getXPReward(){ return getXP(); }

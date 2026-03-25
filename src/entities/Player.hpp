@@ -14,6 +14,7 @@
 class Enemy;   // forward declaration
 #include <vector>
 #include <memory>
+#include <string>
 
 class Player : public Entity {
 public:
@@ -32,17 +33,32 @@ public:
     void move(int dx, int dy, class Map& map, const std::vector<std::unique_ptr<Enemy>>& enemies);
 
     // Getters dos atributos do personagem
-    int getHp()      const;
-    int getMaxHp()   const;
-    int getAttack()  const;
-    int getDefense() const;
+    int getHp()         const;
+    int getMaxHp()      const;
+    int getAttack()     const;
+    int getDefense()    const;
+    int getXP()         const;
+    int getLevel()      const;
+    int getXPProxLevel() const;
 
     void takeDamage(int amount);
     bool isAlive() const;
+
+    void raiseHP();
+    void raiseAttack();
+    void raiseDefense();
+    void raiseLuck();
+    std::string addXP(int xpRecebido);
+
 
 private:
     int hp_;       // Vida atual
     int maxHp_;    // Vida máxima
     int attack_;   // Poder de ataque
     int defense_;  // Poder de defesa
+    int luck_;     // Sorte de items ou quantidade de itens
+
+    int xp_;
+    int level_;
+    int xpProxLevel_;
 };
