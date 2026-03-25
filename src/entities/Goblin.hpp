@@ -9,5 +9,6 @@ public:
     Goblin(int x, int y);
 
     void update(Map& map, Player& player) override;
+    int getXPReward() override;
 
 };

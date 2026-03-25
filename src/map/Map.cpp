@@ -156,8 +156,9 @@ void Map::updateVisibility(int px, int py){
             
         }
     }
-    for (int dy = -1; dy <= 1; ++dy) {
-        for (int dx = -1; dx <= 1; ++dx) {
+    //explora o raio de ação, aumenta a visibilidade do fog of war
+    for (int dy = -2; dy <= 2; ++dy) {
+        for (int dx = -2; dx <= 2; ++dx) {
             int novoRaioX = px + dx;
             int novoRaioY = py + dy;
             if (novoRaioX >= 0 && novoRaioX < width_ && novoRaioY >= 0 && novoRaioY < height_) {

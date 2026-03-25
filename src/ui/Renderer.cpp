@@ -18,7 +18,7 @@ void Renderer::clearScreen() {
 #endif
 }
 
-void Renderer::render(const Map& map, const Player& player, const std::vector<std::unique_ptr<Enemy>>& enemies) {
+void Renderer::render(const Map& map, const Player& player, const std::vector<std::unique_ptr<Enemy>>& enemies, const std::deque<std::string>& messageLog) {
     clearScreen();
 
     // Iteramos o mapa linha por linha (y = linha, x = coluna)
@@ -55,19 +55,28 @@ void Renderer::render(const Map& map, const Player& player, const std::vector<st
         std::cout << '\n';
     }
     // Desenha o HUD logo abaixo do mapa
-    renderHUD(player);
+    renderHUD(player, messageLog);
 }
 
-void Renderer::renderHUD(const Player& player) {
+void Renderer::renderHUD(const Player& player, const std::deque<std::string>& messageLog) {
     // Linha separadora
     std::cout << std::string(40, '-') << '\n';
 
     // HP em formato "HP: atual/maximo"
+    std::cout << " Level: " << player.getLevel();
+    std::cout << " XP: " << player.getXP() << "/" << player.getXPProxLevel();
+    std::cout << '\n';
+    
     std::cout << " HP: " << player.getHp() << "/" << player.getMaxHp();
     std::cout << "   ATK: " << player.getAttack();
     std::cout << "   DEF: " << player.getDefense();
     std::cout << '\n';
-
+    
     std::cout << std::string(40, '-') << '\n';
     std::cout << " [W/A/S/D] Mover   [Q] Sair\n";
+
+    for (const auto& message : messageLog) {
+        std::cout << message;
+        std::cout << '\n';
+    }
 }

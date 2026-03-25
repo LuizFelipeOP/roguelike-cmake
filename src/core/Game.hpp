@@ -17,6 +17,7 @@
 #include <vector>
 #include <memory>
 #include "entities/EnemyFactory.hpp"
+#include <deque>
 
 class Game {
 public:
@@ -37,10 +38,12 @@ private:
     Player   player_;
     Renderer renderer_;
     std::vector<std::unique_ptr<Enemy>> enemies_;
-
+    std::deque<std::string> messageLog_;
+    
     // --- Etapas do loop ---
     // Separar em métodos privados deixa run() limpo e legível
     void processInput();  // Lê o teclado e decide o que fazer
     void update();        // Atualiza o estado do mundo (movimento, combate, etc.)
     void render();        // Pede ao Renderer que desenhe o estado atual
+    void pushMessage(const std::string& message);   // Adiciona mensagens para usuarios  
 };

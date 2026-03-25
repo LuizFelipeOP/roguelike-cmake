@@ -10,6 +10,10 @@ Player::Player(int x, int y)
     , maxHp_(50)
     , attack_(5)
     , defense_(2)
+    , luck_(2)
+    , xp_(0)
+    , level_(1)
+    , xpProxLevel_(20)
 {
     // Define o símbolo do jogador como '@' — tradição dos roguelikes desde Rogue (1980)
     symbol_ = '@';
@@ -54,8 +58,64 @@ void Player::takeDamage(int amount){
 bool Player::isAlive() const {
     return hp_ > 0;
 }
-int Player::getHp()      const { return hp_; }
-int Player::getMaxHp()   const { return maxHp_; }
-int Player::getAttack()  const { return attack_; }
-int Player::getDefense() const { return defense_; }
+int Player::getHp()             const { return hp_; }
+int Player::getMaxHp()          const { return maxHp_; }
+int Player::getAttack()         const { return attack_; }
+int Player::getDefense()        const { return defense_; }
+int Player::getXP()             const { return xp_; }
+int Player::getLevel()          const { return level_; }
+int Player::getXPProxLevel()    const { return xpProxLevel_; }
+//adiciona xp ao jogador
+std::string Player::addXP(int xpRecebido){
+    xp_ = xp_ + xpRecebido;
+    std::string notificacao = "";
+    while(xp_ >= xpProxLevel_){
+        xp_ -= xpProxLevel_;
+        xpProxLevel_ = static_cast<int>(xpProxLevel_ * 1.5);
+        level_++;
+        
+        //status melhorados aleatoriamente
+        std::mt19937 rng(static_cast<unsigned int>(time(nullptr)) + 1);
+        std::uniform_int_distribution<int> randType(0, 3);
 
+        std::string statusUpado = "";
+        switch (randType(rng)) {
+            case 0: 
+                raiseHP();
+                statusUpado = "HP";
+                break;
+            case 1: 
+                raiseAttack();
+                statusUpado = "Ataque"; 
+                break;
+            case 2: 
+                raiseDefense();
+                statusUpado = "Defesa"; 
+                break;
+            case 3: 
+                raiseLuck();
+                statusUpado = "Sorte";  
+                break;
+        }
+        notificacao = "Subiu de nivel! " + statusUpado + " aumentado";
+    }
+    return notificacao;
+}
+
+//melhor HP
+void Player::raiseHP(){
+    maxHp_ = maxHp_ + 2;
+    hp_ = hp_ + 2;
+}
+
+void Player::raiseAttack(){
+    attack_ = attack_ + 1;
+}
+
+void Player::raiseDefense(){
+    defense_ = defense_ + 1;
+}
+
+void Player::raiseLuck(){
+    luck_ = luck_ + 1;
+}

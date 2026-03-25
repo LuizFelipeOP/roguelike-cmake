@@ -17,6 +17,7 @@
 #include "map/Map.hpp"
 #include "entities/Player.hpp"
 #include "entities/Enemy.hpp"
+#include <deque>
 
 class Renderer {
 public:
@@ -24,11 +25,11 @@ public:
 
     // render(): desenha o estado completo do jogo no console
     // Recebe o mapa e o jogador para saber o que desenhar
-    void render(const Map& map, const Player& player, const std::vector<std::unique_ptr<Enemy>>& enemies);
+    void render(const Map& map, const Player& player, const std::vector<std::unique_ptr<Enemy>>& enemies, const std::deque<std::string>& messageLog);
 
     // renderHUD(): desenha a barra de status (HP, nível, etc.)
     // HUD = Heads-Up Display — informações fixas na tela
-    void renderHUD(const Player& player);
+    void renderHUD(const Player& , const std::deque<std::string>&  messageLog);
 
 private:
     // clearScreen(): limpa o terminal antes de cada frame
