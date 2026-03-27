@@ -5,6 +5,10 @@ C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\entities\Entity
 C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\entities\Goblin.cpp;C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\build\roguelike.dir\Debug\Goblin.obj
 C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\entities\Player.cpp;C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\build\roguelike.dir\Debug\Player.obj
 C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\entities\Troll.cpp;C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\build\roguelike.dir\Debug\Troll.obj
+C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\items\AumentarATKStrategy.cpp;C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\build\roguelike.dir\Debug\AumentarATKStrategy.obj
+C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\items\BonusDefStrategy.cpp;C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\build\roguelike.dir\Debug\BonusDefStrategy.obj
+C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\items\CuraStrategy.cpp;C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\build\roguelike.dir\Debug\CuraStrategy.obj
+C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\items\Item.cpp;C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\build\roguelike.dir\Debug\Item.obj
 C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\main.cpp;C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\build\roguelike.dir\Debug\main.obj
 C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\map\Map.cpp;C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\build\roguelike.dir\Debug\Map.obj
 C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\map\Room.cpp;C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\build\roguelike.dir\Debug\Room.obj

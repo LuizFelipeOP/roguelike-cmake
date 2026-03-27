@@ -44,7 +44,8 @@ public:
     void takeDamage(int amount);
     bool isAlive() const;
 
-    void raiseHP();
+    // void raiseHP();
+    void curar(int quantidade);
     void raiseAttack();
     void raiseDefense();
     void raiseLuck();

@@ -343,6 +343,10 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\entities\Goblin.cpp" />
     <ClCompile Include="C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\entities\Player.cpp" />
     <ClCompile Include="C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\entities\Troll.cpp" />
+    <ClCompile Include="C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\items\AumentarATKStrategy.cpp" />
+    <ClCompile Include="C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\items\BonusDefStrategy.cpp" />
+    <ClCompile Include="C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\items\CuraStrategy.cpp" />
+    <ClCompile Include="C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\items\Item.cpp" />
     <ClCompile Include="C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\main.cpp" />
     <ClCompile Include="C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\map\Map.cpp" />
     <ClCompile Include="C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\map\Room.cpp" />

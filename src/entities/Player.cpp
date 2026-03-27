@@ -81,19 +81,24 @@ std::string Player::addXP(int xpRecebido){
         std::string statusUpado = "";
         switch (randType(rng)) {
             case 0: 
-                raiseHP();
+                // raiseHP();
+                maxHp_ = maxHp_ + 2;
+                hp_ = hp_ + 2;
                 statusUpado = "HP";
                 break;
             case 1: 
-                raiseAttack();
+                // raiseAttack();
+                attack_ = attack_ + 1;
                 statusUpado = "Ataque"; 
                 break;
             case 2: 
-                raiseDefense();
+                // raiseDefense();
+                defense_ = defense_ + 1;
                 statusUpado = "Defesa"; 
                 break;
             case 3: 
-                raiseLuck();
+                // raiseLuck();
+                luck_ = luck_ + 1;
                 statusUpado = "Sorte";  
                 break;
         }
@@ -102,20 +107,35 @@ std::string Player::addXP(int xpRecebido){
     return notificacao;
 }
 
-//melhor HP
-void Player::raiseHP(){
-    maxHp_ = maxHp_ + 2;
-    hp_ = hp_ + 2;
-}
 
-void Player::raiseAttack(){
+
+void Player::curar(int quantidade) {
+    if(hp_ + quantidade >=  maxHp_){
+        hp_ = maxHp_;
+    }else{
+        hp_ = hp_ + quantidade;
+    }
+}
+void Player::raiseAttack() {
     attack_ = attack_ + 1;
 }
-
-void Player::raiseDefense(){
+void Player::raiseDefense() {
     defense_ = defense_ + 1;
 }
+// //melhor HP
+// void Player::raiseHP(){
+//     maxHp_ = maxHp_ + 2;
+//     hp_ = hp_ + 2;
+// }
 
-void Player::raiseLuck(){
-    luck_ = luck_ + 1;
-}
+// void Player::raiseAttack(){
+//     attack_ = attack_ + 1;
+// }
+
+// void Player::raiseDefense(){
+//     defense_ = defense_ + 1;
+// }
+
+// void Player::raiseLuck(){
+//     luck_ = luck_ + 1;
+// }

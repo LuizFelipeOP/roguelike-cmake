@@ -22,6 +22,18 @@
     <ClCompile Include="C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\entities\Troll.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\items\AumentarATKStrategy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\items\BonusDefStrategy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\items\CuraStrategy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\items\Item.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

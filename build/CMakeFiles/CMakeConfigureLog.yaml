@@ -24,7 +24,7 @@ events:
       The output was:
       0
       Vers├úo do MSBuild 17.14.40+3e7442088 para .NET Framework
-      Compila├º├úo de 24/03/2026 20:59:53 iniciada.
+      Compila├º├úo de 26/03/2026 22:31:40 iniciada.
       
       Projeto "C:\\Users\\lufeo\\OneDrive\\Documentos\\Estudos Dev\\C++\\roguelike\\build\\CMakeFiles\\3.31.11\\CompilerIdCXX\\CompilerIdCXX.vcxproj" no n├│ 1 (destinos padr├úo).
       PrepareForBuild:
@@ -53,7 +53,7 @@ events:
           0 Aviso(s)
           0 Erro(s)
       
-      Tempo Decorrido 00:00:00.42
+      Tempo Decorrido 00:00:00.58
       
       
       Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.exe"
@@ -72,8 +72,8 @@ events:
     checks:
       - "Detecting CXX compiler ABI info"
     directories:
-      source: "C:/Users/lufeo/OneDrive/Documentos/Estudos Dev/C++/roguelike/build/CMakeFiles/CMakeScratch/TryCompile-xn8so8"
-      binary: "C:/Users/lufeo/OneDrive/Documentos/Estudos Dev/C++/roguelike/build/CMakeFiles/CMakeScratch/TryCompile-xn8so8"
+      source: "C:/Users/lufeo/OneDrive/Documentos/Estudos Dev/C++/roguelike/build/CMakeFiles/CMakeScratch/TryCompile-leek92"
+      binary: "C:/Users/lufeo/OneDrive/Documentos/Estudos Dev/C++/roguelike/build/CMakeFiles/CMakeScratch/TryCompile-leek92"
     cmakeVariables:
       CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /GR /EHsc"
       CMAKE_CXX_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
@@ -83,40 +83,40 @@ events:
       variable: "CMAKE_CXX_ABI_COMPILED"
       cached: true
       stdout: |
-        Change Dir: 'C:/Users/lufeo/OneDrive/Documentos/Estudos Dev/C++/roguelike/build/CMakeFiles/CMakeScratch/TryCompile-xn8so8'
+        Change Dir: 'C:/Users/lufeo/OneDrive/Documentos/Estudos Dev/C++/roguelike/build/CMakeFiles/CMakeScratch/TryCompile-leek92'
         
-        Run Build Command(s): "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_3b1be.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        Run Build Command(s): "C:/Program Files (x86)/Microsoft Visual Studio/2022/BuildTools/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_ddf84.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
         Vers├úo do MSBuild 17.14.40+3e7442088 para .NET Framework
-        Compila├º├úo de 24/03/2026 20:59:54 iniciada.
+        Compila├º├úo de 26/03/2026 22:31:41 iniciada.
         
-        Projeto "C:\\Users\\lufeo\\OneDrive\\Documentos\\Estudos Dev\\C++\\roguelike\\build\\CMakeFiles\\CMakeScratch\\TryCompile-xn8so8\\cmTC_3b1be.vcxproj" no n├│ 1 (destinos padr├úo).
+        Projeto "C:\\Users\\lufeo\\OneDrive\\Documentos\\Estudos Dev\\C++\\roguelike\\build\\CMakeFiles\\CMakeScratch\\TryCompile-leek92\\cmTC_ddf84.vcxproj" no n├│ 1 (destinos padr├úo).
         PrepareForBuild:
-          Criando o diret├│rio "cmTC_3b1be.dir\\Debug\\".
+          Criando o diret├│rio "cmTC_ddf84.dir\\Debug\\".
           A sa├¡da estruturada est├í habilitada. A formata├º├úo do diagn├│stico do compilador refletir├í a hierarquia de erros. Consulte https://aka.ms/cpp/structured-output para obter mais detalhes.
-          Criando o diret├│rio "C:\\Users\\lufeo\\OneDrive\\Documentos\\Estudos Dev\\C++\\roguelike\\build\\CMakeFiles\\CMakeScratch\\TryCompile-xn8so8\\Debug\\".
-          Criando o diret├│rio "cmTC_3b1be.dir\\Debug\\cmTC_3b1be.tlog\\".
+          Criando o diret├│rio "C:\\Users\\lufeo\\OneDrive\\Documentos\\Estudos Dev\\C++\\roguelike\\build\\CMakeFiles\\CMakeScratch\\TryCompile-leek92\\Debug\\".
+          Criando o diret├│rio "cmTC_ddf84.dir\\Debug\\cmTC_ddf84.tlog\\".
         InitializeBuildStatus:
-          Criando "cmTC_3b1be.dir\\Debug\\cmTC_3b1be.tlog\\unsuccessfulbuild" porque "AlwaysCreate" foi especificado.
-          Tocando "cmTC_3b1be.dir\\Debug\\cmTC_3b1be.tlog\\unsuccessfulbuild".
+          Criando "cmTC_ddf84.dir\\Debug\\cmTC_ddf84.tlog\\unsuccessfulbuild" porque "AlwaysCreate" foi especificado.
+          Tocando "cmTC_ddf84.dir\\Debug\\cmTC_ddf84.tlog\\unsuccessfulbuild".
         ClCompile:
-          C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_3b1be.dir\\Debug\\\\" /Fd"cmTC_3b1be.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-3.31\\Modules\\CMakeCXXCompilerABI.cpp"
+          C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_ddf84.dir\\Debug\\\\" /Fd"cmTC_ddf84.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-3.31\\Modules\\CMakeCXXCompilerABI.cpp"
           Microsoft (R) C/C++ Optimizing Compiler Vers├úo 19.44.35224 para x64
           Copyright (C) Microsoft Corporation. Todos os direitos reservados.
-          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_3b1be.dir\\Debug\\\\" /Fd"cmTC_3b1be.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-3.31\\Modules\\CMakeCXXCompilerABI.cpp"
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_ddf84.dir\\Debug\\\\" /Fd"cmTC_ddf84.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-3.31\\Modules\\CMakeCXXCompilerABI.cpp"
           CMakeCXXCompilerABI.cpp
         Link:
-          C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\lufeo\\OneDrive\\Documentos\\Estudos Dev\\C++\\roguelike\\build\\CMakeFiles\\CMakeScratch\\TryCompile-xn8so8\\Debug\\cmTC_3b1be.exe" /INCREMENTAL /ILK:"cmTC_3b1be.dir\\Debug\\cmTC_3b1be.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/lufeo/OneDrive/Documentos/Estudos Dev/C++/roguelike/build/CMakeFiles/CMakeScratch/TryCompile-xn8so8/Debug/cmTC_3b1be.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/lufeo/OneDrive/Documentos/Estudos Dev/C++/roguelike/build/CMakeFiles/CMakeScratch/TryCompile-xn8so8/Debug/cmTC_3b1be.lib" /MACHINE:X64  /machine:x64 cmTC_3b1be.dir\\Debug\\CMakeCXXCompilerABI.obj
-          cmTC_3b1be.vcxproj -> C:\\Users\\lufeo\\OneDrive\\Documentos\\Estudos Dev\\C++\\roguelike\\build\\CMakeFiles\\CMakeScratch\\TryCompile-xn8so8\\Debug\\cmTC_3b1be.exe
+          C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"C:\\Users\\lufeo\\OneDrive\\Documentos\\Estudos Dev\\C++\\roguelike\\build\\CMakeFiles\\CMakeScratch\\TryCompile-leek92\\Debug\\cmTC_ddf84.exe" /INCREMENTAL /ILK:"cmTC_ddf84.dir\\Debug\\cmTC_ddf84.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/Users/lufeo/OneDrive/Documentos/Estudos Dev/C++/roguelike/build/CMakeFiles/CMakeScratch/TryCompile-leek92/Debug/cmTC_ddf84.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/Users/lufeo/OneDrive/Documentos/Estudos Dev/C++/roguelike/build/CMakeFiles/CMakeScratch/TryCompile-leek92/Debug/cmTC_ddf84.lib" /MACHINE:X64  /machine:x64 cmTC_ddf84.dir\\Debug\\CMakeCXXCompilerABI.obj
+          cmTC_ddf84.vcxproj -> C:\\Users\\lufeo\\OneDrive\\Documentos\\Estudos Dev\\C++\\roguelike\\build\\CMakeFiles\\CMakeScratch\\TryCompile-leek92\\Debug\\cmTC_ddf84.exe
         FinalizeBuildStatus:
-          Excluindo o arquivo "cmTC_3b1be.dir\\Debug\\cmTC_3b1be.tlog\\unsuccessfulbuild".
-          Tocando "cmTC_3b1be.dir\\Debug\\cmTC_3b1be.tlog\\cmTC_3b1be.lastbuildstate".
-        Projeto de compila├º├úo pronto "C:\\Users\\lufeo\\OneDrive\\Documentos\\Estudos Dev\\C++\\roguelike\\build\\CMakeFiles\\CMakeScratch\\TryCompile-xn8so8\\cmTC_3b1be.vcxproj" (destinos padr├úo).
+          Excluindo o arquivo "cmTC_ddf84.dir\\Debug\\cmTC_ddf84.tlog\\unsuccessfulbuild".
+          Tocando "cmTC_ddf84.dir\\Debug\\cmTC_ddf84.tlog\\cmTC_ddf84.lastbuildstate".
+        Projeto de compila├º├úo pronto "C:\\Users\\lufeo\\OneDrive\\Documentos\\Estudos Dev\\C++\\roguelike\\build\\CMakeFiles\\CMakeScratch\\TryCompile-leek92\\cmTC_ddf84.vcxproj" (destinos padr├úo).
         
         Compila├º├úo com ├¬xito.
             0 Aviso(s)
             0 Erro(s)
         
-        Tempo Decorrido 00:00:00.39
+        Tempo Decorrido 00:00:00.40
         
       exitCode: 0
   -
