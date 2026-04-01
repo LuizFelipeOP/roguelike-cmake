@@ -43,6 +43,12 @@
     <ClCompile Include="C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\map\Room.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\observers\LogObserver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\observers\StatsObserver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\ui\Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

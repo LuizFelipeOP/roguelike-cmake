@@ -29,7 +29,7 @@ class Item {
 
     char getSymbol() const;
     
-    void setPosicao(int x, int y);
+    void setPosicao(int x, int y); // -1,-1 quando no inventári
     private:
         std::string nome_;
         ItemType tipo_;

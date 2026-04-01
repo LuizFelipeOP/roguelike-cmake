@@ -12,4 +12,6 @@ C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\items\Item.cpp;
 C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\main.cpp;C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\build\roguelike.dir\Debug\main.obj
 C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\map\Map.cpp;C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\build\roguelike.dir\Debug\Map.obj
 C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\map\Room.cpp;C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\build\roguelike.dir\Debug\Room.obj
+C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\observers\LogObserver.cpp;C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\build\roguelike.dir\Debug\LogObserver.obj
+C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\observers\StatsObserver.cpp;C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\build\roguelike.dir\Debug\StatsObserver.obj
 C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\src\ui\Renderer.cpp;C:\Users\lufeo\OneDrive\Documentos\Estudos Dev\C++\roguelike\build\roguelike.dir\Debug\Renderer.obj
