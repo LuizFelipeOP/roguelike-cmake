@@ -1,6 +1,5 @@
 #include "../entities/Player.hpp"
 #include "StatsObserver.hpp"
-#include "../entities/Player.hpp"
 #include "../items/Inventario.hpp"
 
 StatsObserver::StatsObserver(Inventario& inventario)

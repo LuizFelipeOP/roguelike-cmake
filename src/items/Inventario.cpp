@@ -40,25 +40,59 @@ void Inventario::equipar(ItemSlot slot, int index) {
 }
 
 void Inventario::desequipar(ItemSlot slot) {
+    auto& item = slotRef(slot);
+    if(!item) return;
 
+    if(consumiveis_.size() < 5){
+        consumiveis_.push_back(std::move(item));
+    }else{
+        if(onDescarte) onDescarte("Inventario cheio, remova um item para poder desequipar este!");
+        item.reset();
+    }
 }
 
 std::unique_ptr<Item> Inventario::removerConsumivel(int index) {
-    // remove item e retorna
-    return nullptr;
+    if(index < 0 || index >= consumiveis_.size()) return nullptr;
+    auto consumivel = std::move(consumiveis_[index]);
+    consumiveis_.erase(consumiveis_.begin() + index);
+    return consumivel;
 }
 
 Item* Inventario::getEquipado(ItemSlot slot) const {
-    // retorna item equipado
-    return nullptr;
+    switch (slot)
+    {
+        case ItemSlot::Arma: return arma_.get();
+        case ItemSlot::Armadura: return armadura_.get();
+        case ItemSlot::Acessorio: return acessorio_.get();
+        
+        default: return nullptr;
+    }
 }
 
 const std::vector<std::unique_ptr<Item>>& Inventario::getConsumiveis() const {
     // retorna todos os consumiveis
-    return {};
+    return consumiveis_;
 }
 
 bool Inventario::cheio(ItemSlot slot) const {
-    // retorna se inventario esta totalmente cheio
-    return false;
+    switch (slot)
+    {
+        case ItemSlot::Arma: return  arma_ != nullptr;
+        case ItemSlot::Armadura: return armadura_ != nullptr;
+        case ItemSlot::Acessorio: return acessorio_ != nullptr;
+
+        case ItemSlot::Consumivel: return consumiveis_.size() >= 5;
+        
+        default: return false;
+    }
+}
+
+std::unique_ptr<Item>& Inventario::slotRef(ItemSlot slot) {
+    switch (slot) {
+        case ItemSlot::Arma: return arma_;
+        case ItemSlot::Armadura: return armadura_;
+        case ItemSlot::Acessorio: return acessorio_;
+        
+        default: return arma_;
+    }
 }

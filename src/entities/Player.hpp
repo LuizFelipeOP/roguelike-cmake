@@ -15,6 +15,8 @@ class Enemy;   // forward declaration
 #include <vector>
 #include <memory>
 #include <string>
+#include "observers/Observer.hpp"
+#include "items/Inventario.hpp"
 
 class Player : public Entity {
 public:
@@ -44,13 +46,24 @@ public:
     void takeDamage(int amount);
     bool isAlive() const;
 
-    // void raiseHP();
     void curar(int quantidade);
+
+    void setAttackBonus(int bonus);
+    void setDefenseBonus(int bonus);
+    void adicionarObserver(Observer* obs);
+    void notificarObservers();
+    Inventario& getInventario();
     void raiseAttack();
     void raiseDefense();
     void raiseLuck();
+    
     std::string addXP(int xpRecebido);
 
+    //logica de status e inventario (strategy e observer)
+    int attackBonus_;
+    int defenseBonus_;
+    std::vector<Observer*> observers_;
+    Inventario inventario_;
 
 private:
     int hp_;       // Vida atual
