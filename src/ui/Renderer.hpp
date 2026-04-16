@@ -17,6 +17,8 @@
 #include "map/Map.hpp"
 #include "entities/Player.hpp"
 #include "entities/Enemy.hpp"
+#include "items/Item.hpp"
+#include "items/Inventario.hpp"
 #include <deque>
 
 class Renderer {
@@ -25,11 +27,21 @@ public:
 
     // render(): desenha o estado completo do jogo no console
     // Recebe o mapa e o jogador para saber o que desenhar
-    void render(const Map& map, const Player& player, const std::vector<std::unique_ptr<Enemy>>& enemies, const std::deque<std::string>& messageLog);
+    void render(
+        const Map& map, 
+        const Player& player, 
+        const std::vector<std::unique_ptr<Enemy>>& enemies, 
+        const std::vector<std::unique_ptr<Item>>& items,
+        const std::deque<std::string>& messageLog,
+        bool inventarioAberto
+    );
 
     // renderHUD(): desenha a barra de status (HP, nível, etc.)
     // HUD = Heads-Up Display — informações fixas na tela
-    void renderHUD(const Player& , const std::deque<std::string>&  messageLog);
+    void renderHUD(const Player& , const std::deque<std::string>&  messageLog, bool inventarioAberto);
+
+    // renderiza UI de inventario
+    void renderInventario(const Inventario& inv);
 
 private:
     // clearScreen(): limpa o terminal antes de cada frame

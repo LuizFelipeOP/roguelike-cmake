@@ -14,6 +14,8 @@ Player::Player(int x, int y)
     , xp_(0)
     , level_(1)
     , xpProxLevel_(20)
+    , attackBonus_(0)
+    , defenseBonus_(0)
 {
     // Define o símbolo do jogador como '@' — tradição dos roguelikes desde Rogue (1980)
     symbol_ = '@';
@@ -60,8 +62,8 @@ bool Player::isAlive() const {
 }
 int Player::getHp()             const { return hp_; }
 int Player::getMaxHp()          const { return maxHp_; }
-int Player::getAttack()         const { return attack_; }
-int Player::getDefense()        const { return defense_; }
+int Player::getAttack()         const { return attack_ + attackBonus_; }
+int Player::getDefense()        const { return defense_ + defenseBonus_; }
 int Player::getXP()             const { return xp_; }
 int Player::getLevel()          const { return level_; }
 int Player::getXPProxLevel()    const { return xpProxLevel_; }
@@ -81,19 +83,24 @@ std::string Player::addXP(int xpRecebido){
         std::string statusUpado = "";
         switch (randType(rng)) {
             case 0: 
-                raiseHP();
+                // raiseHP();
+                maxHp_ = maxHp_ + 2;
+                hp_ = hp_ + 2;
                 statusUpado = "HP";
                 break;
             case 1: 
-                raiseAttack();
+                // raiseAttack();
+                attack_ = attack_ + 1;
                 statusUpado = "Ataque"; 
                 break;
             case 2: 
-                raiseDefense();
+                // raiseDefense();
+                defense_ = defense_ + 1;
                 statusUpado = "Defesa"; 
                 break;
             case 3: 
-                raiseLuck();
+                // raiseLuck();
+                luck_ = luck_ + 1;
                 statusUpado = "Sorte";  
                 break;
         }
@@ -102,20 +109,52 @@ std::string Player::addXP(int xpRecebido){
     return notificacao;
 }
 
-//melhor HP
-void Player::raiseHP(){
-    maxHp_ = maxHp_ + 2;
-    hp_ = hp_ + 2;
-}
 
-void Player::raiseAttack(){
+
+void Player::curar(int quantidade) {
+    hp_ = std::min(hp_ + quantidade, maxHp_);
+}
+void Player::raiseAttack() {
     attack_ = attack_ + 1;
 }
-
-void Player::raiseDefense(){
+void Player::raiseDefense() {
     defense_ = defense_ + 1;
 }
 
-void Player::raiseLuck(){
+void Player::raiseLuck() {
     luck_ = luck_ + 1;
 }
+
+void Player::setAttackBonus(int bonus) { attackBonus_ = bonus; }
+
+void Player::setDefenseBonus(int bonus) { defenseBonus_ = bonus;}
+
+void Player::adicionarObserver(Observer* obs) {
+    observers_.push_back(obs);
+}
+
+void Player::notificarObservers() {
+    for (auto* obs : observers_) obs->onNotify(*this);
+}
+
+Inventario&       Player::getInventario()       { return inventario_; }
+const Inventario& Player::getInventario() const { return inventario_; }
+
+
+// //melhor HP
+// void Player::raiseHP(){
+//     maxHp_ = maxHp_ + 2;
+//     hp_ = hp_ + 2;
+// }
+
+// void Player::raiseAttack(){
+//     attack_ = attack_ + 1;
+// }
+
+// void Player::raiseDefense(){
+//     defense_ = defense_ + 1;
+// }
+
+// void Player::raiseLuck(){
+//     luck_ = luck_ + 1;
+// }
