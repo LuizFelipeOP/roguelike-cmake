@@ -52,19 +52,15 @@ public:
     void setDefenseBonus(int bonus);
     void adicionarObserver(Observer* obs);
     void notificarObservers();
-    Inventario& getInventario();
+    Inventario&       getInventario();
+    const Inventario& getInventario() const;
     void raiseAttack();
     void raiseDefense();
     void raiseLuck();
     
     std::string addXP(int xpRecebido);
 
-    //logica de status e inventario (strategy e observer)
-    int attackBonus_;
-    int defenseBonus_;
-    std::vector<Observer*> observers_;
-    Inventario inventario_;
-
+    
 private:
     int hp_;       // Vida atual
     int maxHp_;    // Vida máxima
@@ -75,4 +71,11 @@ private:
     int xp_;
     int level_;
     int xpProxLevel_;
+
+    //logica de status e inventario (strategy e observer)
+    int attackBonus_;
+    int defenseBonus_;
+    std::vector<Observer*> observers_;
+    Inventario inventario_;
+
 };

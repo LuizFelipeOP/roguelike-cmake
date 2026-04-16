@@ -7,6 +7,8 @@
 std::unique_ptr<Item> ItemFactory::create(ItemType tipo, int x, int y){
     switch (tipo)
     {
+    case ItemType::PocaoDeVidaPequena:  
+        return std::make_unique<Item>("Pocao de vida pequena", tipo, ItemSlot::Consumivel, x, y, std::make_unique<CuraStrategy>(10));
     case ItemType::PocaoDeVida:  
         return std::make_unique<Item>("Pocao de vida", tipo, ItemSlot::Consumivel, x, y, std::make_unique<CuraStrategy>(20));
     case ItemType::PocaoDeForça:  

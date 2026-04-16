@@ -18,6 +18,10 @@
 #include <memory>
 #include "entities/EnemyFactory.hpp"
 #include <deque>
+#include "items/Item.hpp"
+#include "items/ItemFactory.hpp"
+#include "observers/StatsObserver.hpp"
+#include "observers/LogObserver.hpp"
 
 class Game {
 public:
@@ -39,11 +43,22 @@ private:
     Renderer renderer_;
     std::vector<std::unique_ptr<Enemy>> enemies_;
     std::deque<std::string> messageLog_;
-    
+    std::vector<std::unique_ptr<Item>> items_;
+    bool inventarioAberto_;
+    StatsObserver statsObserver_;
+    LogObserver   logObserver_;
+
     // --- Etapas do loop ---
     // Separar em métodos privados deixa run() limpo e legível
-    void processInput();  // Lê o teclado e decide o que fazer
-    void update();        // Atualiza o estado do mundo (movimento, combate, etc.)
-    void render();        // Pede ao Renderer que desenhe o estado atual
-    void pushMessage(const std::string& message);   // Adiciona mensagens para usuarios  
+    void processInput();    // Lê o teclado e decide o que fazer
+    void update();          // Atualiza o estado do mundo (movimento, combate, etc.)
+    void render();          // Pede ao Renderer que desenhe o estado atual
+    void pushMessage(const std::string& message);   // Adiciona mensagens para usuarios
+    void coletarItem();     //coleta item para inventario do  player  
+    void usarConsumivel();   //coleta intem no chão e consome sem subir ao inventario
+    void usarConsumivelInventario(int index); //usa item (de 1 a 5) do inventario
+
+    void equiparSelecionado(); //pega primeiro consumivel do inventario e equipa no slot correspondente, e notifica observers
+    void desequiparSelecionado(); //tenta desequipar arma → armadura → acessório (o primeiro que encontrar), notifica observers
+
 };

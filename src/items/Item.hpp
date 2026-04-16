@@ -5,7 +5,7 @@
 
 class Player;
 
-enum class ItemType { PocaoDeVida, PocaoDeForça, Espada, Armadura, Amuleto };
+enum class ItemType { PocaoDeVidaPequena, PocaoDeVida, PocaoDeForça, Espada, Armadura, Amuleto };
 enum class ItemSlot { Arma, Armadura, Acessorio, Consumivel };
 
 class Item {
@@ -19,7 +19,7 @@ class Item {
         int y, 
         std::unique_ptr<ItemStrategy> strategy);
 
-    void usar(Player& player);  // delega para strategy_
+    void usar(Player& player);  // delega para strategy_ o uso do item
 
     std::string getNome() const;
     ItemType getTipo() const;

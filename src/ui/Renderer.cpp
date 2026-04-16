@@ -18,7 +18,14 @@ void Renderer::clearScreen() {
 #endif
 }
 
-void Renderer::render(const Map& map, const Player& player, const std::vector<std::unique_ptr<Enemy>>& enemies, const std::deque<std::string>& messageLog) {
+void Renderer::render(
+        const Map& map, 
+        const Player& player, 
+        const std::vector<std::unique_ptr<Enemy>>& enemies, 
+        const std::vector<std::unique_ptr<Item>>& items,        
+        const std::deque<std::string>& messageLog,
+        bool inventarioAberto
+    ) {
     clearScreen();
 
     // Iteramos o mapa linha por linha (y = linha, x = coluna)
@@ -42,9 +49,19 @@ void Renderer::render(const Map& map, const Player& player, const std::vector<st
                     }
 
                 }
-                if (!hadEnemy) {
+
+                bool hadItem = false;
+                for (const auto& item : items){
+                    if(item->getX() == x && item->getY() == y){
+                        std::cout << item->getSymbol();
+                        hadItem = true;
+                    }
+                }
+                if (!hadEnemy && !hadItem) {
                     std::cout << map.getTile(x, y);
                 }
+
+                
             }else{
                  std::cout << ' ';
                  continue;
@@ -55,10 +72,16 @@ void Renderer::render(const Map& map, const Player& player, const std::vector<st
         std::cout << '\n';
     }
     // Desenha o HUD logo abaixo do mapa
-    renderHUD(player, messageLog);
+    renderHUD(player, messageLog, inventarioAberto);
 }
 
-void Renderer::renderHUD(const Player& player, const std::deque<std::string>& messageLog) {
+void Renderer::renderHUD(const Player& player, const std::deque<std::string>& messageLog, bool inventarioAberto) {
+
+    if(inventarioAberto) {
+        renderInventario(player.getInventario());
+        return;
+    };
+
     // Linha separadora
     std::cout << std::string(40, '-') << '\n';
 
@@ -80,3 +103,37 @@ void Renderer::renderHUD(const Player& player, const std::deque<std::string>& me
         std::cout << '\n';
     }
 }
+
+void Renderer::renderInventario(const Inventario& inv) {
+    // Linha separadora
+    std::cout << std::string(40, '-') << '\n';
+    std::cout << std::string("=== INVENTARIO ===");
+    std::cout << std::string(40, '-') << '\n';
+    std::cout << " Equipados:\n";
+
+    auto printSlot = [&](const char* label, ItemSlot slot){
+        Item* item = inv.getEquipado(slot);
+        std::cout << "   " << label << (item ? item->getNome() : "--") << '\n';
+    };
+    printSlot("Arma: ", ItemSlot::Arma);
+    printSlot("Armadura: ", ItemSlot::Armadura);
+    printSlot("Acessorio: ", ItemSlot::Acessorio);
+
+    std::cout << "\n Consumiveis:\n";
+    const auto& cons = inv.getConsumiveis();
+    for (int i = 0; i < 5; i++)
+    {
+        std::cout << " ["<< (i + 1) << "] ";
+        if (i < static_cast<int>(cons.size()))
+        {
+            std::cout << cons[i]->getNome();
+        } else 
+            std::cout << "--";
+        std::cout << "\n";
+        
+    }
+    std::cout << std::string(40, '-') << '\n';
+    std::cout << " [1-5] Usar  [E] Equipar  [X] Desequipar  [I] Fechar\n";
+    std::cout << std::string(40, '-') << '\n';
+}
+
