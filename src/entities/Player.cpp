@@ -114,8 +114,8 @@ std::string Player::addXP(int xpRecebido){
 void Player::curar(int quantidade) {
     hp_ = std::min(hp_ + quantidade, maxHp_);
 }
-void Player::raiseAttack() {
-    attack_ = attack_ + 1;
+void Player::raiseAttack(int quantidade) {
+    attack_ = attack_ + quantidade;
 }
 void Player::raiseDefense() {
     defense_ = defense_ + 1;

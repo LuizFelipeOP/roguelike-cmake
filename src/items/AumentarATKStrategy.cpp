@@ -3,7 +3,10 @@
 #include "AumentarATKStrategy.hpp"
 #include <algorithm> 
 
+AumentarATKStrategy::AumentarATKStrategy(int quantidade)
+    : quantidade_(quantidade)
+{}
 
 void AumentarATKStrategy::usar(Player& player){
-    player.raiseAttack();
+    player.raiseAttack(quantidade_);
 }

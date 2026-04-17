@@ -54,7 +54,7 @@ public:
     void notificarObservers();
     Inventario&       getInventario();
     const Inventario& getInventario() const;
-    void raiseAttack();
+    void raiseAttack(int quantidade);
     void raiseDefense();
     void raiseLuck();
     

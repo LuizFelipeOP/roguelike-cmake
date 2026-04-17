@@ -5,7 +5,7 @@
 
 class Player;
 
-enum class ItemType { PocaoDeVidaPequena, PocaoDeVida, PocaoDeForça, Espada, Armadura, Amuleto };
+enum class ItemType { PocaoDeVidaPequena, PocaoDeVida, PocaoDeForça, Espada, EspadaGrande, Armadura, Amuleto };
 enum class ItemSlot { Arma, Armadura, Acessorio, Consumivel };
 
 class Item {
