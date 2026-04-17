@@ -37,7 +37,7 @@ static char readKey() {
 
 Game::Game()
     : isRunning_(true)
-    , map_(60, 22)        // Mapa maior para caber mais salas
+    , map_(80, 40)        // Mapa maior para caber mais salas
     , player_(2, 2)       // Posição inicial fixa — será ajustada após generate()
     , renderer_()
     , enemies_()            //vetor de ponteiros de inimigos
@@ -61,6 +61,7 @@ Game::Game()
         ItemType::PocaoDeVidaPequena,
         ItemType::PocaoDeVida,
         ItemType::Espada,
+        ItemType::EspadaGrande,
         ItemType::Armadura,
         ItemType::Amuleto
     };
@@ -154,7 +155,13 @@ void Game::processInput() {
 
         case 'e': if (inventarioAberto_) equiparSelecionado(); break;
         case 'x': if (inventarioAberto_) desequiparSelecionado(); break; 
-
+        case 'r':
+            if (inventarioAberto_) {
+                char next = readKey();
+                if (next >= '1' && next <= '5')
+                    descartarItem(next - '1');
+            }
+            break;
         case 'q': isRunning_ = false;          break;  // sair
         default: break;  // Tecla desconhecida — ignora, não faz nada
     }
@@ -170,12 +177,14 @@ void Game::coletarItem() {
             items_[i]->getY() == playerY )
         {
             std::string nomeItem = items_[i]->getNome();
+            if(player_.getInventario().cheio(items_[i]->getSlot())){ //retorna se ja tem slot cheio do mesmo item
+                logObserver_.onEvent("Slot de item cheio...");
+                return;
+            }
             bool coletado = player_.getInventario().adicionarItem(std::move(items_[i]));
             items_.erase(items_.begin() + i); 
             if(coletado){
                 logObserver_.onEvent("Item coletado: " + nomeItem);
-            }else{
-                logObserver_.onEvent("Inventario cheio...");
             }
             return;
         }
@@ -199,6 +208,15 @@ void Game::usarConsumivel(){
 
 
 void Game::usarConsumivelInventario(int index){
+    auto& consumiveis = player_.getInventario().getConsumiveis();
+    if(index < 0 || index >= consumiveis.size()) return;
+
+    if(consumiveis[index]->getSlot() != ItemSlot::Consumivel){
+        logObserver_.onEvent("Este item n eh consumivel.");
+        return;
+    }
+
+
     auto item = player_.getInventario().removerConsumivel(index);
     if (!item) return;
 
@@ -233,6 +251,22 @@ void Game::desequiparSelecionado(){
         }
     }
     
+}
+
+void Game::descartarItem(int index){
+    auto& consumiveis = player_.getInventario().getConsumiveis();
+    if(index < 0 || index >= consumiveis.size()) return;
+    
+    std::string nomeItem = consumiveis[index]->getNome();
+
+    auto item = player_.getInventario().removerConsumivel(index);
+    if (!item) return;
+
+    item->setPosicao(player_.getX(), player_.getY());
+    
+    items_.push_back(std::move(item));
+
+    logObserver_.onEvent("Item " + nomeItem + " removido.");
 }
 
 void Game::update() {

@@ -57,6 +57,7 @@ private:
     void coletarItem();     //coleta item para inventario do  player  
     void usarConsumivel();   //coleta intem no chão e consome sem subir ao inventario
     void usarConsumivelInventario(int index); //usa item (de 1 a 5) do inventario
+    void descartarItem(int index); //desequipar 1 item por vez
 
     void equiparSelecionado(); //pega primeiro consumivel do inventario e equipa no slot correspondente, e notifica observers
     void desequiparSelecionado(); //tenta desequipar arma → armadura → acessório (o primeiro que encontrar), notifica observers
