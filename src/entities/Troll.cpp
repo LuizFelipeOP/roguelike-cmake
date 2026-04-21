@@ -3,8 +3,8 @@
 #include "map/Map.hpp"
 #include <algorithm> 
 
-Troll::Troll(int x, int y)
-    :Enemy(x, y, 12, 5, 3, 25)
+Troll::Troll(int x, int y, int andar)
+    :Enemy(x, y, 12 + (andar - 1) * 5, 5 + (andar - 1) * 2, 3, 25)
 {
     symbol_ = 'T';
 }

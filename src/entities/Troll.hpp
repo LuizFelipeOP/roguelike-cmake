@@ -6,7 +6,7 @@
 class Troll : public Enemy {
 public:
     // Construtor: posição inicial + atributos base
-    Troll(int x, int y);
+    Troll(int x, int y, int andar);
 
     void update(Map& map, Player& player) override;
     int getXPReward() override;

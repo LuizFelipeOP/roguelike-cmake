@@ -96,7 +96,7 @@ void Renderer::renderHUD(const Player& player, const std::deque<std::string>& me
     std::cout << '\n';
     
     std::cout << std::string(40, '-') << '\n';
-    std::cout << " [W/A/S/D] Mover   [Q] Sair\n";
+    std::cout << " [W/A/S/D] Mover   [ESC] Sair\n";
 
     for (const auto& message : messageLog) {
         std::cout << message;

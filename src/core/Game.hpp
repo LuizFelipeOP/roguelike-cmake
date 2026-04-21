@@ -48,6 +48,8 @@ private:
     StatsObserver statsObserver_;
     LogObserver   logObserver_;
 
+    int andarAtual_;
+
     // --- Etapas do loop ---
     // Separar em métodos privados deixa run() limpo e legível
     void processInput();    // Lê o teclado e decide o que fazer
@@ -62,4 +64,6 @@ private:
     void equiparSelecionado(); //pega primeiro consumivel do inventario e equipa no slot correspondente, e notifica observers
     void desequiparSelecionado(); //tenta desequipar arma → armadura → acessório (o primeiro que encontrar), notifica observers
 
+    void inicializarAndar();
+    void descerAndar(); //logica de descer para proxima sala pela escada '>'
 };

@@ -2,6 +2,7 @@
 
 #include "map/Map.hpp"
 #include <algorithm>  // std::min, std::max
+#include <vector>
 
 // ============================================================
 //  Métodos da Fase 1 — seus, não mude
@@ -139,6 +140,25 @@ void Map::generate(unsigned int seed) {
         }
 
     }
+    //logica de posicionar escada em lugar aleatorio.
+    if(rooms_.size() > 1){
+        std::uniform_int_distribution<int> salaAleatoria(1, rooms_.size() - 1);
+        int indiceSalaAleatoria = salaAleatoria(rng);
+        
+        const Room& sala = rooms_[indiceSalaAleatoria];
+
+        std::vector<Point> cantos = {
+            {sala.x + 1              , sala.y + 1},
+            {sala.x + sala.width - 2 , sala.y + 1},
+            {sala.x + 1              , sala.y + sala.height - 2},
+            {sala.x + sala.width - 2 , sala.y + sala.height - 2},
+        };
+
+        std::uniform_int_distribution<int> randCantoSala(0, 3);
+        escada_ = cantos[randCantoSala(rng)];
+
+        desenharEscada(escada_.x, escada_.y);
+    }
     if(rooms_.empty()){
         rooms_.push_back(Room(width_/2 - 3, height_/2 - 2, 6, 4));
         carveRoom(rooms_.back());
@@ -174,4 +194,15 @@ bool Map::isExplored(int x, int y) const {
     //valida se esta fora dos limites
     if (x < 0 || x >= width_ || y < 0 || y >= height_) return false;
     return explored_[y][x];
+}
+
+Point Map::getPosicaoEscada() const {
+    return escada_;
+}
+
+// -------------------------------------------------------------
+// Desenha escada no mapa
+// -------------------------------------------------------------
+void Map::desenharEscada(int x, int y) {
+    tiles_[y][x] = '>';
 }

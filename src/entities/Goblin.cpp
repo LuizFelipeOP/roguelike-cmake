@@ -3,8 +3,8 @@
 #include "map/Map.hpp"
 #include <algorithm> 
 
-Goblin::Goblin(int x, int y)
-    :Enemy(x, y, 6, 3, 1, 10)
+Goblin::Goblin(int x, int y, int andar)
+    :Enemy(x, y, 6 + (andar - 1) * 3, 3 + (andar - 1), 1, 10)
 {
     symbol_ = 'g';
 }
