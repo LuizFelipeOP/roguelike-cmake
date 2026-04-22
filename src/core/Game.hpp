@@ -54,7 +54,6 @@ private:
     // Separar em métodos privados deixa run() limpo e legível
     void processInput();    // Lê o teclado e decide o que fazer
     void update();          // Atualiza o estado do mundo (movimento, combate, etc.)
-    void render();          // Pede ao Renderer que desenhe o estado atual
     void pushMessage(const std::string& message);   // Adiciona mensagens para usuarios
     void coletarItem();     //coleta item para inventario do  player  
     void usarConsumivel();   //coleta intem no chão e consome sem subir ao inventario
@@ -64,6 +63,13 @@ private:
     void equiparSelecionado(); //pega primeiro consumivel do inventario e equipa no slot correspondente, e notifica observers
     void desequiparSelecionado(); //tenta desequipar arma → armadura → acessório (o primeiro que encontrar), notifica observers
 
+protected:
+    // Métodos protegidos para permitir override e acesso em testes via subclasse
+    virtual void render();  // Pede ao Renderer que desenhe o estado atual
     void inicializarAndar();
-    void descerAndar(); //logica de descer para proxima sala pela escada '>'
+    void descerAndar();     // logica de descer para proxima sala pela escada '>'
+
+    int    getAndarAtual()  const { return andarAtual_; }
+    size_t getNumEnemies()  const { return enemies_.size(); }
+    size_t getNumItems()    const { return items_.size(); }
 };

@@ -48,6 +48,12 @@ Game::Game()
     , logObserver_(messageLog_)
     , andarAtual_(1)
 {
+    //conectar observer ao player
+    player_.adicionarObserver(&statsObserver_);
+    player_.getInventario().onDescarte = [this](const std::string& msg){
+        logObserver_.onEvent(msg);
+    };
+    
     inicializarAndar();
 }
 
@@ -116,16 +122,11 @@ void Game::inicializarAndar(){
     // Posiciona o jogador no centro da primeira sala gerada
     if (!map_.getRooms().empty()) {
         Point start = map_.getRooms().front().center();
-        player_ = Player(start.x, start.y);
+        player_.setPosition(start.x, start.y);
 
         //inicializar a visualização do mapa antes do jogador dar o primeiro input
         map_.updateVisibility(player_.getX(), player_.getY());
         
-        //conectar observer ao player
-        player_.adicionarObserver(&statsObserver_);
-        player_.getInventario().onDescarte = [this](const std::string& msg){
-            logObserver_.onEvent(msg);
-        };
 
         const std::vector rooms = map_.getRooms();
         //começa na sala 1 (int i = 1) para pular a sala do jogador
@@ -136,7 +137,7 @@ void Game::inicializarAndar(){
 
             //spam de enemy no centro da sala
             EnemyType tipo = (randType(rng) == 0) ? EnemyType::Goblin : EnemyType::Troll;
-            enemies_.push_back(EnemyFactory::create(tipo, centroRoom.x, centroRoom.y, 1));
+            enemies_.push_back(EnemyFactory::create(tipo, centroRoom.x, centroRoom.y, andarAtual_));
 
             //chance de um item spawnar
             if (chance(rng) < 0.7f) {
@@ -147,7 +148,7 @@ void Game::inicializarAndar(){
                 int salaPosicaoX = rx(rng), salaPosicaoY = ry(rng);
 
                 //criar o item na sala
-                items_.push_back(ItemFactory::create(salaPosicaoX, salaPosicaoY, 1));
+                items_.push_back(ItemFactory::create(salaPosicaoX, salaPosicaoY, andarAtual_));
             }
 
         }
@@ -156,13 +157,13 @@ void Game::inicializarAndar(){
 
 void Game::descerAndar(){
     andarAtual_++;
-    map_.generate(static_cast<unsigned int>(time(nullptr)));
+    // map_.generate(static_cast<unsigned int>(time(nullptr)));
 
     enemies_.clear();
     items_.clear();
 
-    Point start = map_.getRooms().front().center();
-    player_ = Player(start.x, start.y);
+    // Point start = map_.getRooms().front().center();
+    // player_ = Player(start.x, start.y);
 
     inicializarAndar();
 }
@@ -273,7 +274,9 @@ void Game::descartarItem(int index){
 void Game::update() {
 
     player_.update();
-            
+    //posição da escada do andar atual.
+    Point escada = map_.getPosicaoEscada();
+
     //loop para o inimigo reagir quando o jogador consegue vê-lo
     for (auto& enemy : enemies_) {
         if(enemy->isAlive()){
@@ -306,10 +309,15 @@ void Game::update() {
     if (!player_.isAlive()) {
         isRunning_ = false;
     }
+
+    if(player_.getX() == escada.x && 
+        player_.getY() == escada.y){
+            descerAndar();
+        }
 }
 
 void Game::render() {
-    renderer_.render(map_, player_, enemies_, items_ ,messageLog_, inventarioAberto_);
+    renderer_.render(map_, player_, enemies_, items_ ,messageLog_, inventarioAberto_, andarAtual_);
 }
 
 void Game::pushMessage(const std::string& message) {

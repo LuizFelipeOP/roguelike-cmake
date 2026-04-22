@@ -78,10 +78,28 @@ Projeto roguelike clássico (inspirado no Rogue de 1980) desenvolvido em C++17 c
 
 ---
 
+---
+
+### Testes Automatizados (transversal — Phases 1–6)
+**Status:** Concluída  
+**Objetivo:** Cobertura de testes unitários para todas as funcionalidades implementadas.  
+**Framework:** doctest v2.4.11 via CMake FetchContent  
+**O que foi feito:**
+- 71 testes passando, 0 falhas
+- `tests/test_entities.cpp` — Player, Goblin, Troll, Enemy (14 testes)
+- `tests/test_factories.cpp` — EnemyFactory, ItemFactory (7 testes)
+- `tests/test_map.cpp` — Room, Map, Fog of War (10 testes)
+- `tests/test_items.cpp` — Strategies, Item, Inventario (12 testes)
+- `tests/test_observers.cpp` — StatsObserver, anti-duplicação (7 testes)
+- `tests/test_game.cpp` — Game (andar, descerAndar) via subclasse de teste (4 testes)
+- `tests/main_tests.cpp` — ponto de entrada do executável de testes
+
+---
+
 ## Phases planejadas (sugestões)
 
 ### Phase 6 — Múltiplos Andares e Progressão de Dungeon
-**Status:** Em andamento  
+**Status:** Concluída
 **Objetivo:** Adicionar escadas para descer/subir andares, com dificuldade crescente.  
 **O que pode ser feito:**
 - Tile especial `>` (escada para baixo) gerado em sala aleatória
