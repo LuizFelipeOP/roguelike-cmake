@@ -34,6 +34,9 @@ public:
     // Declaramos o Map com forward declaration abaixo para evitar include circular
     void move(int dx, int dy, class Map& map, const std::vector<std::unique_ptr<Enemy>>& enemies);
 
+    //posiciona player num lugar especifico
+    void setPosition(int x, int y);
+    
     // Getters dos atributos do personagem
     int getHp()         const;
     int getMaxHp()      const;

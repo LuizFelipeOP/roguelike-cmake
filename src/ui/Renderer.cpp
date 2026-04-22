@@ -24,7 +24,8 @@ void Renderer::render(
         const std::vector<std::unique_ptr<Enemy>>& enemies, 
         const std::vector<std::unique_ptr<Item>>& items,        
         const std::deque<std::string>& messageLog,
-        bool inventarioAberto
+        bool inventarioAberto,
+        int andarAtual
     ) {
     clearScreen();
 
@@ -72,10 +73,10 @@ void Renderer::render(
         std::cout << '\n';
     }
     // Desenha o HUD logo abaixo do mapa
-    renderHUD(player, messageLog, inventarioAberto);
+    renderHUD(player, messageLog, inventarioAberto, andarAtual);
 }
 
-void Renderer::renderHUD(const Player& player, const std::deque<std::string>& messageLog, bool inventarioAberto) {
+void Renderer::renderHUD(const Player& player, const std::deque<std::string>& messageLog, bool inventarioAberto, int  andarAtual) {
 
     if(inventarioAberto) {
         renderInventario(player.getInventario());
@@ -88,6 +89,7 @@ void Renderer::renderHUD(const Player& player, const std::deque<std::string>& me
     // HP em formato "HP: atual/maximo"
     std::cout << " Level: " << player.getLevel();
     std::cout << " XP: " << player.getXP() << "/" << player.getXPProxLevel();
+    std::cout << " Andar: " << andarAtual;
     std::cout << '\n';
     
     std::cout << " HP: " << player.getHp() << "/" << player.getMaxHp();
@@ -96,7 +98,7 @@ void Renderer::renderHUD(const Player& player, const std::deque<std::string>& me
     std::cout << '\n';
     
     std::cout << std::string(40, '-') << '\n';
-    std::cout << " [W/A/S/D] Mover   [Q] Sair\n";
+    std::cout << " [W/A/S/D] Mover   [ESC] Sair\n";
 
     for (const auto& message : messageLog) {
         std::cout << message;

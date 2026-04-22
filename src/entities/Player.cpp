@@ -52,6 +52,13 @@ void Player::move(int dx, int dy, Map& map, const std::vector<std::unique_ptr<En
 
 
 }
+//posiciona player num lugar especifico
+void Player::setPosition(int x, int y){
+    x_ = x;
+    y_ = y;
+}
+
+
 //logica de receber dano
 void Player::takeDamage(int amount){
     hp_ = hp_ - std::max(1, amount - defense_);
@@ -130,6 +137,8 @@ void Player::setAttackBonus(int bonus) { attackBonus_ = bonus; }
 void Player::setDefenseBonus(int bonus) { defenseBonus_ = bonus;}
 
 void Player::adicionarObserver(Observer* obs) {
+    for (auto* o : observers_)
+        if (o == obs) return;   // guard: evita duplicata do mesmo ponteiro
     observers_.push_back(obs);
 }
 

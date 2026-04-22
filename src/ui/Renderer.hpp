@@ -33,12 +33,13 @@ public:
         const std::vector<std::unique_ptr<Enemy>>& enemies, 
         const std::vector<std::unique_ptr<Item>>& items,
         const std::deque<std::string>& messageLog,
-        bool inventarioAberto
+        bool inventarioAberto,
+        int andarAtual
     );
 
     // renderHUD(): desenha a barra de status (HP, nível, etc.)
     // HUD = Heads-Up Display — informações fixas na tela
-    void renderHUD(const Player& , const std::deque<std::string>&  messageLog, bool inventarioAberto);
+    void renderHUD(const Player& , const std::deque<std::string>&  messageLog, bool inventarioAberto, int andarAtual);
 
     // renderiza UI de inventario
     void renderInventario(const Inventario& inv);

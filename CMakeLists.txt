@@ -23,3 +23,39 @@ add_executable(roguelike ${SOURCES})
 # target_include_directories(): diz ao compilador onde estão os headers (.hpp)
 # Assim você pode fazer #include "core/Game.hpp" de qualquer lugar dentro de src/
 target_include_directories(roguelike PRIVATE src)
+
+# ─────────────────────────────────────────────
+# Testes — doctest via FetchContent
+# ─────────────────────────────────────────────
+
+include(FetchContent)
+
+FetchContent_Declare(
+    doctest
+    GIT_REPOSITORY https://github.com/doctest/doctest.git
+    GIT_TAG        v2.4.11
+)
+FetchContent_MakeAvailable(doctest)
+
+enable_testing()
+
+# Sources de produção reutilizadas nos testes — exclui main.cpp para evitar
+# conflito de ponto de entrada com o main gerado pelo doctest
+file(GLOB_RECURSE TEST_GAME_SOURCES "src/*.cpp")
+list(FILTER TEST_GAME_SOURCES EXCLUDE REGEX ".*main\\.cpp$")
+
+# Arquivos de teste em tests/
+file(GLOB TEST_SOURCES "tests/*.cpp")
+
+add_executable(roguelike_tests ${TEST_SOURCES} ${TEST_GAME_SOURCES})
+
+target_include_directories(roguelike_tests PRIVATE src)
+target_link_libraries(roguelike_tests PRIVATE doctest::doctest)
+
+if(MSVC)
+    target_compile_options(roguelike_tests PRIVATE /W4 /utf-8)
+endif()
+
+# Registra cada TEST_CASE do doctest como um teste CTest individual
+include(${doctest_SOURCE_DIR}/scripts/cmake/doctest.cmake)
+doctest_discover_tests(roguelike_tests)

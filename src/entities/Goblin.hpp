@@ -6,7 +6,7 @@
 class Goblin : public Enemy {
 public:
     // Construtor: posição inicial + atributos base
-    Goblin(int x, int y);
+    Goblin(int x, int y, int andar);
 
     void update(Map& map, Player& player) override;
     int getXPReward() override;

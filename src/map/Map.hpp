@@ -31,6 +31,8 @@ public:
     //metodos do Fog of war
     bool isExplored(int x, int y) const;
     void updateVisibility(int px, int py);
+    Point getPosicaoEscada() const;
+    void desenharEscada(int x, int y);
 
 private:
     int width_;
@@ -52,5 +54,8 @@ private:
 
     //campo do Fog of war
     std::vector<std::vector<bool>> explored_;
+
+    //posição da escada gerada em generated()
+    Point escada_;
     
 };

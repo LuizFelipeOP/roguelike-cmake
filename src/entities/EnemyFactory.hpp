@@ -7,5 +7,5 @@ enum class EnemyType { Goblin, Troll };
 
 class EnemyFactory {
 public:
-    static std::unique_ptr<Enemy> create(EnemyType type, int x, int y);
+    static std::unique_ptr<Enemy> create(EnemyType type, int x, int y, int andar);
 };

@@ -37,7 +37,7 @@ static char readKey() {
 
 Game::Game()
     : isRunning_(true)
-    , map_(80, 40)        // Mapa maior para caber mais salas
+    , map_(60, 22)        // Mapa maior para caber mais salas
     , player_(2, 2)       // Posição inicial fixa — será ajustada após generate()
     , renderer_()
     , enemies_()            //vetor de ponteiros de inimigos
@@ -46,77 +46,15 @@ Game::Game()
     , inventarioAberto_(false)
     , statsObserver_(player_.getInventario())
     , logObserver_(messageLog_)
+    , andarAtual_(1)
 {
-    // Gera o dungeon com uma seed baseada no tempo — mapa diferente a cada execução
-    // Na Fase 7 (persistência) vamos salvar a seed para recriar o mesmo dungeon
-    map_.generate(static_cast<unsigned int>(time(nullptr)));
-    
-    //variaveis de aletoriedade do spawn de inimigos
-    std::mt19937 rng(static_cast<unsigned int>(time(nullptr)) + 1);
-    std::uniform_int_distribution<int> randType(0, 1);
-    
-    //vetor com tipos de item 
-    std::vector enemyTypes = {
-        ItemType::PocaoDeForça, 
-        ItemType::PocaoDeVidaPequena,
-        ItemType::PocaoDeVida,
-        ItemType::Espada,
-        ItemType::EspadaGrande,
-        ItemType::Armadura,
-        ItemType::Amuleto
+    //conectar observer ao player
+    player_.adicionarObserver(&statsObserver_);
+    player_.getInventario().onDescarte = [this](const std::string& msg){
+        logObserver_.onEvent(msg);
     };
-    //id para o vetor de enemyTypes ^
-
-    int tipoIdx = 0;
-
-    //randomizar vetor de inimigos e pegar porcentagem de chance de spawn
-    std::shuffle(enemyTypes.begin(), enemyTypes.end(), rng);
-    std::uniform_real_distribution<float> chance(0.0f, 1.0f);
-
-    // Posiciona o jogador no centro da primeira sala gerada
-    if (!map_.getRooms().empty()) {
-        Point start = map_.getRooms().front().center();
-        player_ = Player(start.x, start.y);
-
-        //inicializar a visualização do mapa antes do jogador dar o primeiro input
-        map_.updateVisibility(player_.getX(), player_.getY());
-        
-        //conectar observer ao player
-        player_.adicionarObserver(&statsObserver_);
-        player_.getInventario().onDescarte = [this](const std::string& msg){
-            logObserver_.onEvent(msg);
-        };
-
-        const std::vector rooms = map_.getRooms();
-        //começa na sala 1 (int i = 1) para pular a sala do jogador
-        for (int i = 1; i < rooms.size(); i++)
-        {
-            // pega o centro da room atual
-            Point centroRoom = rooms[i].center();
-
-            //spam de enemy no centro da sala
-            EnemyType tipo = (randType(rng) == 0) ? EnemyType::Goblin : EnemyType::Troll;
-            enemies_.push_back(EnemyFactory::create(tipo, centroRoom.x, centroRoom.y));
-
-            //chance de um inimigo spawnar
-            if (chance(rng) < 0.9f) {
-                //pegar espaço aleatorio da sala
-                const Room& salaAtual = rooms[i];
-                std::uniform_int_distribution<int> rx(salaAtual.x + 1, salaAtual.x + salaAtual.width - 2);
-                std::uniform_int_distribution<int> ry(salaAtual.y + 1, salaAtual.y + salaAtual.height - 2);
-                int salaX = rx(rng), salaY = ry(rng);
-
-                //escolher o tipo de item pelo indice
-                ItemType tipoInimigo = enemyTypes[tipoIdx % enemyTypes.size()];
-                tipoIdx++;
-                //criar o item na sala
-                items_.push_back(ItemFactory::create(tipoInimigo, salaX, salaY));
-            }
-
-        }
-    }
-
     
+    inicializarAndar();
 }
 
 void Game::run() {
@@ -137,6 +75,9 @@ void Game::run() {
 
 void Game::processInput() {
     char key = readKey();
+
+    // Esc fecha o jogo antes do tolower, pois tolower pode alterar bytes de controle
+    if (key == 27) { isRunning_ = false; return; }
 
     // Converte para minúsculo para aceitar WASD e wasd
     key = static_cast<char>(tolower(key));
@@ -162,10 +103,71 @@ void Game::processInput() {
                     descartarItem(next - '1');
             }
             break;
-        case 'q': isRunning_ = false;          break;  // sair
         default: break;  // Tecla desconhecida — ignora, não faz nada
     }
 }
+
+void Game::inicializarAndar(){
+    // Gera o dungeon com uma seed baseada no tempo — mapa diferente a cada execução
+    // Na Fase 7 (persistência) vamos salvar a seed para recriar o mesmo dungeon
+    map_.generate(static_cast<unsigned int>(time(nullptr)));
+    
+    //variaveis de aletoriedade do spawn de inimigos
+    std::mt19937 rng(static_cast<unsigned int>(time(nullptr)) + 1);
+    std::uniform_int_distribution<int> randType(0, 1);
+    
+    //randomizar vetor de inimigos e pegar porcentagem de chance de spawn
+    std::uniform_real_distribution<float> chance(0.0f, 1.0f);
+
+    // Posiciona o jogador no centro da primeira sala gerada
+    if (!map_.getRooms().empty()) {
+        Point start = map_.getRooms().front().center();
+        player_.setPosition(start.x, start.y);
+
+        //inicializar a visualização do mapa antes do jogador dar o primeiro input
+        map_.updateVisibility(player_.getX(), player_.getY());
+        
+
+        const std::vector rooms = map_.getRooms();
+        //começa na sala 1 (int i = 1) para pular a sala do jogador
+        for (int i = 1; i < rooms.size(); i++)
+        {
+            // pega o centro da room atual
+            Point centroRoom = rooms[i].center();
+
+            //spam de enemy no centro da sala
+            EnemyType tipo = (randType(rng) == 0) ? EnemyType::Goblin : EnemyType::Troll;
+            enemies_.push_back(EnemyFactory::create(tipo, centroRoom.x, centroRoom.y, andarAtual_));
+
+            //chance de um item spawnar
+            if (chance(rng) < 0.7f) {
+                //pegar espaço aleatorio da sala
+                const Room& salaAtual = rooms[i];
+                std::uniform_int_distribution<int> rx(salaAtual.x + 1, salaAtual.x + salaAtual.width - 2);
+                std::uniform_int_distribution<int> ry(salaAtual.y + 1, salaAtual.y + salaAtual.height - 2);
+                int salaPosicaoX = rx(rng), salaPosicaoY = ry(rng);
+
+                //criar o item na sala
+                items_.push_back(ItemFactory::create(salaPosicaoX, salaPosicaoY, andarAtual_));
+            }
+
+        }
+    }
+}
+
+void Game::descerAndar(){
+    andarAtual_++;
+    // map_.generate(static_cast<unsigned int>(time(nullptr)));
+
+    enemies_.clear();
+    items_.clear();
+
+    // Point start = map_.getRooms().front().center();
+    // player_ = Player(start.x, start.y);
+
+    inicializarAndar();
+}
+
 void Game::coletarItem() {
     //se houver item no mesmo lugar que o player esta então tenta adicionar ao inventario dele;
     int playerX = player_.getX();
@@ -272,7 +274,9 @@ void Game::descartarItem(int index){
 void Game::update() {
 
     player_.update();
-            
+    //posição da escada do andar atual.
+    Point escada = map_.getPosicaoEscada();
+
     //loop para o inimigo reagir quando o jogador consegue vê-lo
     for (auto& enemy : enemies_) {
         if(enemy->isAlive()){
@@ -305,10 +309,15 @@ void Game::update() {
     if (!player_.isAlive()) {
         isRunning_ = false;
     }
+
+    if(player_.getX() == escada.x && 
+        player_.getY() == escada.y){
+            descerAndar();
+        }
 }
 
 void Game::render() {
-    renderer_.render(map_, player_, enemies_, items_ ,messageLog_, inventarioAberto_);
+    renderer_.render(map_, player_, enemies_, items_ ,messageLog_, inventarioAberto_, andarAtual_);
 }
 
 void Game::pushMessage(const std::string& message) {

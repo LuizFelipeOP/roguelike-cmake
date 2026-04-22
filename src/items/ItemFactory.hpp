@@ -4,5 +4,5 @@
 
 class ItemFactory{
     public:
-        static std::unique_ptr<Item> create(ItemType tipo, int x, int y);
+        static std::unique_ptr<Item> create(int x, int y, int andar);
 };
