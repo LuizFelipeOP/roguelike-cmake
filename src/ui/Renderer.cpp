@@ -11,7 +11,25 @@
 
 void Renderer::clearScreen() {
 #ifdef _WIN32
-    system("cls");
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    // Oculta o cursor piscante
+    CONSOLE_CURSOR_INFO cursorInfo = {1, FALSE};
+    SetConsoleCursorInfo(hConsole, &cursorInfo);
+
+    // Descobre o tamanho atual do buffer do console
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(hConsole, &csbi);
+    DWORD tamanho = csbi.dwSize.X * csbi.dwSize.Y;
+
+    // Preenche todo o buffer com espaços a partir do topo — sem flash
+    COORD origem = {0, 0};
+    DWORD escrito;
+    FillConsoleOutputCharacter(hConsole, ' ', tamanho, origem, &escrito);
+    FillConsoleOutputAttribute(hConsole, csbi.wAttributes, tamanho, origem, &escrito);
+
+    // Reposiciona o cursor no topo
+    SetConsoleCursorPosition(hConsole, origem);
 #else
     // No Linux/Mac usamos sequência ANSI
     std::cout << "\033[2J\033[H";

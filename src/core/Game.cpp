@@ -112,6 +112,8 @@ void Game::inicializarAndar(){
     // Na Fase 7 (persistência) vamos salvar a seed para recriar o mesmo dungeon
     map_.generate(static_cast<unsigned int>(time(nullptr)));
     
+    Point posEscada = map_.getPosicaoEscada();
+    
     //variaveis de aletoriedade do spawn de inimigos
     std::mt19937 rng(static_cast<unsigned int>(time(nullptr)) + 1);
     std::uniform_int_distribution<int> randType(0, 1);
@@ -145,7 +147,17 @@ void Game::inicializarAndar(){
                 const Room& salaAtual = rooms[i];
                 std::uniform_int_distribution<int> rx(salaAtual.x + 1, salaAtual.x + salaAtual.width - 2);
                 std::uniform_int_distribution<int> ry(salaAtual.y + 1, salaAtual.y + salaAtual.height - 2);
-                int salaPosicaoX = rx(rng), salaPosicaoY = ry(rng);
+                int salaPosicaoX, salaPosicaoY;
+
+                do{ 
+                    salaPosicaoX = rx(rng);
+                    salaPosicaoY = ry(rng);
+                } while (
+                    (salaPosicaoX == posEscada.x && salaPosicaoY == posEscada.y) ||
+                    std::any_of(items_.begin(), items_.end(), [&](const auto& item){
+                        return item->getX() == salaPosicaoX && item->getY() == salaPosicaoY;
+                    })
+                );
 
                 //criar o item na sala
                 items_.push_back(ItemFactory::create(salaPosicaoX, salaPosicaoY, andarAtual_));
