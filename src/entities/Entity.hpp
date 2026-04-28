@@ -1,4 +1,9 @@
 #pragma once
+#include "../effects/StatusEffect.hpp"
+#include <vector>
+#include <memory>
+#include <functional>
+#include <string>
 
 // Entity.hpp — Classe base abstrata para todas as entidades do jogo
 //
@@ -37,10 +42,26 @@ public:
     // Símbolo que representa a entidade no mapa (ex: '@' para jogador, 'G' para goblin)
     char getSymbol() const;
 
+    void adicionarEfeito(std::unique_ptr<StatusEffect> efeito);
+    std::vector<std::string> getEfeitosNomes() const;
+
+    // Callback chamado ao aplicar ou expirar um efeito — configurado externamente
+    // Mesmo padrão do onDescarte no Inventario
+    std::function<void(const std::string&)> onEfeitoEvento;
+    void tickEfeitos();
+    bool isParalisado() const;
+    void setParalisado(bool valor);
+    virtual void takeDamage(int quantidade) {}
+    virtual void curar(int quantidade) {}
+    virtual void reduzirDanoAtaque(int quantidade) {}
+    
 protected:
     // "protected": acessível pela própria classe E pelas subclasses,
     // mas não por código externo. Isso encapsula o estado interno.
     int  x_;
     int  y_;
     char symbol_;  // Subclasses definem seu próprio símbolo
+
+    std::vector<std::unique_ptr<StatusEffect>> efeitos_;
+    bool paralisado_ = false;
 };

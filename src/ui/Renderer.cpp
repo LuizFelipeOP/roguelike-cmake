@@ -54,7 +54,10 @@ void Renderer::render(
             
             // Se a posição do jogador coincide com este tile, desenhamos o jogador
             if (x == player.getX() && y == player.getY()) {
+                auto nomes = player.getEfeitosNomes();
+                setCorEfeito(nomes);
                 std::cout << player.getSymbol();
+                resetarCor();
                 continue;
             }
             
@@ -124,8 +127,7 @@ void Renderer::renderHUD(const Player& player, const std::deque<std::string>& me
     }
 }
 
-void Renderer::renderInventario(const Inventario& inv) {
-    // Linha separadora
+void Renderer::renderInventario(const Inventario& inv) {    // Linha separadora
     std::cout << std::string(40, '-') << '\n';
     std::cout << std::string("=== INVENTARIO ===");
     std::cout << std::string(40, '-') << '\n';
@@ -155,5 +157,32 @@ void Renderer::renderInventario(const Inventario& inv) {
     std::cout << std::string(40, '-') << '\n';
     std::cout << " [1-5] Usar  [E] Equipar  [X] Desequipar  [I] Fechar\n";
     std::cout << std::string(40, '-') << '\n';
+}
+
+void Renderer::setCorEfeito(const std::vector<std::string>& nomes) {
+    // Prioridade: Paralisia (amarelo) > Veneno (verde) > padrão (sem mudança)
+    bool temParalisia = false;
+    bool temVeneno    = false;
+    for (const auto& nome : nomes) {
+        if (nome == "Paralisia") temParalisia = true;
+        if (nome == "Veneno")    temVeneno    = true;
+    }
+
+#ifdef _WIN32
+    HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+    if      (temParalisia) SetConsoleTextAttribute(h, 14); // amarelo
+    else if (temVeneno)    SetConsoleTextAttribute(h, 10); // verde
+#else
+    if      (temParalisia) std::cout << "\033[33m"; // amarelo ANSI
+    else if (temVeneno)    std::cout << "\033[32m"; // verde ANSI
+#endif
+}
+
+void Renderer::resetarCor() {
+#ifdef _WIN32
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7); // branco padrão
+#else
+    std::cout << "\033[0m"; // reset ANSI
+#endif
 }
 

@@ -46,10 +46,11 @@ public:
     int getLevel()      const;
     int getXPProxLevel() const;
 
-    void takeDamage(int amount);
+    void takeDamage(int amount) override;
     bool isAlive() const;
 
-    void curar(int quantidade);
+    void curar(int quantidade) override;
+    void reduzirDanoAtaque(int quantidade) override;
 
     void setAttackBonus(int bonus);
     void setDefenseBonus(int bonus);

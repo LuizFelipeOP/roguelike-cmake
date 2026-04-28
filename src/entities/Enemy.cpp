@@ -18,6 +18,13 @@ void Enemy::takeDamage(int amount){
 //logica de saber se player esta vivo
 bool Enemy::isAlive() const { return hp_ > 0; }
 
+void Enemy::curar(int quantidade) {
+    hp_ += quantidade; // inimigos não têm maxHp definido — cura sem teto
+}
+
+void Enemy::reduzirDanoAtaque(int quantidade) {
+    attack_ = std::max(1, attack_ - quantidade);
+}
 
 int Enemy::getHp()          const { return hp_; }
 int Enemy::getAttack()      const { return attack_; }

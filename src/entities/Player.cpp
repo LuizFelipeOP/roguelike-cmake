@@ -27,6 +27,8 @@ void Player::update() {
 }
 
 void Player::move(int dx, int dy, Map& map, const std::vector<std::unique_ptr<Enemy>>& enemies) {
+    if (isParalisado()) return;
+
     int newX = x_ + dx;
     int newY = y_ + dy;
 
@@ -120,6 +122,10 @@ std::string Player::addXP(int xpRecebido){
 
 void Player::curar(int quantidade) {
     hp_ = std::min(hp_ + quantidade, maxHp_);
+}
+
+void Player::reduzirDanoAtaque(int quantidade) {
+    attack_ = std::max(1, attack_ - quantidade);
 }
 void Player::raiseAttack(int quantidade) {
     attack_ = attack_ + quantidade;

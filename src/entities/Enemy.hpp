@@ -24,8 +24,10 @@ public:
     virtual int getXPReward() = 0;
     int getXP() const;
     
-    void takeDamage(int amount);
+    void takeDamage(int amount) override;
     bool isAlive() const;
+    void curar(int quantidade) override;
+    void reduzirDanoAtaque(int quantidade) override;
 
 
 private:
