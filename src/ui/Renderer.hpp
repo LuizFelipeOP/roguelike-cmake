@@ -48,4 +48,13 @@ private:
     // clearScreen(): limpa o terminal antes de cada frame
     // Técnica simples para animação no console
     void clearScreen();
+
+    // Aplica cor no console baseada nos efeitos ativos do player
+    void setCorEfeito(const std::vector<std::string>& nomes);
+
+    // Reseta a cor do console para o padrão (branco)
+    void resetarCor();
+
+    // Aplica cor no console baseada no nome de um efeito específico
+    void setCorPorNome(const std::string& nome);
 };

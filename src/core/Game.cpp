@@ -53,6 +53,9 @@ Game::Game()
     player_.getInventario().onDescarte = [this](const std::string& msg){
         logObserver_.onEvent(msg);
     };
+    player_.onEfeitoEvento = [this](const std::string& msg){
+        pushMessage(msg);
+    };
     
     inicializarAndar();
 }
@@ -112,9 +115,10 @@ void Game::inicializarAndar(){
     // Na Fase 7 (persistência) vamos salvar a seed para recriar o mesmo dungeon
     map_.generate(static_cast<unsigned int>(time(nullptr)));
     
+    Point posEscada = map_.getPosicaoEscada();
+    
     //variaveis de aletoriedade do spawn de inimigos
     std::mt19937 rng(static_cast<unsigned int>(time(nullptr)) + 1);
-    std::uniform_int_distribution<int> randType(0, 1);
     
     //randomizar vetor de inimigos e pegar porcentagem de chance de spawn
     std::uniform_real_distribution<float> chance(0.0f, 1.0f);
@@ -135,8 +139,8 @@ void Game::inicializarAndar(){
             // pega o centro da room atual
             Point centroRoom = rooms[i].center();
 
-            //spam de enemy no centro da sala
-            EnemyType tipo = (randType(rng) == 0) ? EnemyType::Goblin : EnemyType::Troll;
+            //spam de enemy no centro da sala — probabilidade varia por andar
+            EnemyType tipo = EnemyFactory::sortear(andarAtual_, rng);
             enemies_.push_back(EnemyFactory::create(tipo, centroRoom.x, centroRoom.y, andarAtual_));
 
             //chance de um item spawnar
@@ -145,7 +149,17 @@ void Game::inicializarAndar(){
                 const Room& salaAtual = rooms[i];
                 std::uniform_int_distribution<int> rx(salaAtual.x + 1, salaAtual.x + salaAtual.width - 2);
                 std::uniform_int_distribution<int> ry(salaAtual.y + 1, salaAtual.y + salaAtual.height - 2);
-                int salaPosicaoX = rx(rng), salaPosicaoY = ry(rng);
+                int salaPosicaoX, salaPosicaoY;
+
+                do{ 
+                    salaPosicaoX = rx(rng);
+                    salaPosicaoY = ry(rng);
+                } while (
+                    (salaPosicaoX == posEscada.x && salaPosicaoY == posEscada.y) ||
+                    std::any_of(items_.begin(), items_.end(), [&](const auto& item){
+                        return item->getX() == salaPosicaoX && item->getY() == salaPosicaoY;
+                    })
+                );
 
                 //criar o item na sala
                 items_.push_back(ItemFactory::create(salaPosicaoX, salaPosicaoY, andarAtual_));
@@ -274,6 +288,7 @@ void Game::descartarItem(int index){
 void Game::update() {
 
     player_.update();
+    player_.tickEfeitos();
     //posição da escada do andar atual.
     Point escada = map_.getPosicaoEscada();
 

@@ -2,6 +2,8 @@
 #include "CuraStrategy.hpp" 
 #include "AumentarATKStrategy.hpp"
 #include "BonusDefStrategy.hpp"
+#include "AplicarEfeitoStrategy.hpp"
+#include "../effects/RegeneracaoEffect.hpp"
 #include <random>
 
 
@@ -15,6 +17,7 @@ std::unique_ptr<Item> ItemFactory::create(int x, int y, int andar){
         { ItemType::PocaoDeVidaPequena, 5 },
         { ItemType::PocaoDeVida, 3 },
         { ItemType::PocaoDeForça, 3 },
+        { ItemType::PocaoDeRegeneracao, 2 },
     };
     if (andar > 2) {
         pool.push_back({ ItemType::Espada, 2 });
@@ -40,6 +43,9 @@ std::unique_ptr<Item> ItemFactory::create(int x, int y, int andar){
             return std::make_unique<Item>("Pocao de vida", tipo_aleatorio, ItemSlot::Consumivel, x, y, std::make_unique<CuraStrategy>(20));
         case ItemType::PocaoDeForça:  
             return std::make_unique<Item>("Pocao de forca", tipo_aleatorio, ItemSlot::Consumivel, x, y, std::make_unique<AumentarATKStrategy>(1));
+        case ItemType::PocaoDeRegeneracao:
+            return std::make_unique<Item>("Pocao de Regeneracao", tipo_aleatorio, ItemSlot::Consumivel, x, y,
+                std::make_unique<AplicarEfeitoStrategy>([]{ return std::make_unique<RegeneracaoEffect>(5, 3); }));
         case ItemType::Espada:  
             return std::make_unique<Item>("Espada", tipo_aleatorio, ItemSlot::Arma, x,y, std::make_unique<AumentarATKStrategy>(2));
         case ItemType::EspadaGrande:  

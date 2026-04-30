@@ -24,6 +24,13 @@ add_executable(roguelike ${SOURCES})
 # Assim você pode fazer #include "core/Game.hpp" de qualquer lugar dentro de src/
 target_include_directories(roguelike PRIVATE src)
 
+# Runtime estático: embute as DLLs do MSVC no .exe
+# /MT em Release, /MTd em Debug — o .exe Release roda sem Visual Studio instalado
+if(MSVC)
+    set_property(TARGET roguelike PROPERTY
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
+
 # ─────────────────────────────────────────────
 # Testes — doctest via FetchContent
 # ─────────────────────────────────────────────

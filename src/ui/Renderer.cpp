@@ -11,7 +11,25 @@
 
 void Renderer::clearScreen() {
 #ifdef _WIN32
-    system("cls");
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    // Oculta o cursor piscante
+    CONSOLE_CURSOR_INFO cursorInfo = {1, FALSE};
+    SetConsoleCursorInfo(hConsole, &cursorInfo);
+
+    // Descobre o tamanho atual do buffer do console
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(hConsole, &csbi);
+    DWORD tamanho = csbi.dwSize.X * csbi.dwSize.Y;
+
+    // Preenche todo o buffer com espaços a partir do topo — sem flash
+    COORD origem = {0, 0};
+    DWORD escrito;
+    FillConsoleOutputCharacter(hConsole, ' ', tamanho, origem, &escrito);
+    FillConsoleOutputAttribute(hConsole, csbi.wAttributes, tamanho, origem, &escrito);
+
+    // Reposiciona o cursor no topo
+    SetConsoleCursorPosition(hConsole, origem);
 #else
     // No Linux/Mac usamos sequência ANSI
     std::cout << "\033[2J\033[H";
@@ -36,7 +54,10 @@ void Renderer::render(
             
             // Se a posição do jogador coincide com este tile, desenhamos o jogador
             if (x == player.getX() && y == player.getY()) {
+                auto nomes = player.getEfeitosNomes();
+                setCorEfeito(nomes);
                 std::cout << player.getSymbol();
+                resetarCor();
                 continue;
             }
             
@@ -96,6 +117,19 @@ void Renderer::renderHUD(const Player& player, const std::deque<std::string>& me
     std::cout << "   ATK: " << player.getAttack();
     std::cout << "   DEF: " << player.getDefense();
     std::cout << '\n';
+
+    // Linha de efeitos ativos — só exibe se houver algum
+    auto efeitos = player.getEfeitosNomes();
+    std::cout << " Efeitos:";
+    if (!efeitos.empty()) {
+        for (const auto& nome : efeitos) {
+            std::cout << ' ';
+            setCorPorNome(nome);
+            std::cout << '[' << nome << ']';
+            resetarCor();
+        }
+    }
+    std::cout << '\n';
     
     std::cout << std::string(40, '-') << '\n';
     std::cout << " [W/A/S/D] Mover   [ESC] Sair\n";
@@ -106,8 +140,7 @@ void Renderer::renderHUD(const Player& player, const std::deque<std::string>& me
     }
 }
 
-void Renderer::renderInventario(const Inventario& inv) {
-    // Linha separadora
+void Renderer::renderInventario(const Inventario& inv) {    // Linha separadora
     std::cout << std::string(40, '-') << '\n';
     std::cout << std::string("=== INVENTARIO ===");
     std::cout << std::string(40, '-') << '\n';
@@ -137,5 +170,47 @@ void Renderer::renderInventario(const Inventario& inv) {
     std::cout << std::string(40, '-') << '\n';
     std::cout << " [1-5] Usar  [E] Equipar  [X] Desequipar  [I] Fechar\n";
     std::cout << std::string(40, '-') << '\n';
+}
+
+void Renderer::setCorEfeito(const std::vector<std::string>& nomes) {
+    // Prioridade: Paralisia (amarelo) > Veneno (verde) > padrão (sem mudança)
+    bool temParalisia = false;
+    bool temVeneno    = false;
+    for (const auto& nome : nomes) {
+        if (nome == "Paralisia") temParalisia = true;
+        if (nome == "Veneno")    temVeneno    = true;
+    }
+
+#ifdef _WIN32
+    HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+    if      (temParalisia) SetConsoleTextAttribute(h, 14); // amarelo
+    else if (temVeneno)    SetConsoleTextAttribute(h, 10); // verde
+#else
+    if      (temParalisia) std::cout << "\033[33m"; // amarelo ANSI
+    else if (temVeneno)    std::cout << "\033[32m"; // verde ANSI
+#endif
+}
+
+void Renderer::resetarCor() {
+#ifdef _WIN32
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7); // branco padrão
+#else
+    std::cout << "\033[0m"; // reset ANSI
+#endif
+}
+
+void Renderer::setCorPorNome(const std::string& nome) {
+#ifdef _WIN32
+    HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+    if      (nome == "Paralisia")     SetConsoleTextAttribute(h, 14); // amarelo
+    else if (nome == "Veneno")        SetConsoleTextAttribute(h, 10); // verde
+    else if (nome == "Regeneracao")   SetConsoleTextAttribute(h, 11); // ciano
+    else if (nome == "Enfraquecimento") SetConsoleTextAttribute(h, 12); // vermelho
+#else
+    if      (nome == "Paralisia")     std::cout << "\033[33m"; // amarelo
+    else if (nome == "Veneno")        std::cout << "\033[32m"; // verde
+    else if (nome == "Regeneracao")   std::cout << "\033[36m"; // ciano
+    else if (nome == "Enfraquecimento") std::cout << "\033[31m"; // vermelho
+#endif
 }
 
