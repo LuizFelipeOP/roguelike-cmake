@@ -58,6 +58,9 @@ cmake -S . -B build
 cmake --build build --target roguelike_tests
 cd build
 ctest --output-on-failure
+
+
+.\build\Debug\roguelike_tests.exe
 ```
 
 - `cmake -S . -B build` — configura o projeto e baixa o doctest (necessário apenas na primeira vez, ou ao adicionar novos arquivos de teste)

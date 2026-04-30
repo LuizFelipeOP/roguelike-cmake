@@ -7,7 +7,7 @@
 #include <ctime>
 
 Troll::Troll(int x, int y, int andar)
-    :Enemy(x, y, 12 + (andar - 1) * 3, 5 + (andar - 1) * 2, 3, 25)
+    :Enemy(x, y, 12 + (andar - 1) * 5, 5 + (andar - 1) * 2, 3, 25)
 {
     symbol_ = 'T';
 }

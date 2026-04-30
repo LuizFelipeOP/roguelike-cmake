@@ -117,6 +117,19 @@ void Renderer::renderHUD(const Player& player, const std::deque<std::string>& me
     std::cout << "   ATK: " << player.getAttack();
     std::cout << "   DEF: " << player.getDefense();
     std::cout << '\n';
+
+    // Linha de efeitos ativos — só exibe se houver algum
+    auto efeitos = player.getEfeitosNomes();
+    std::cout << " Efeitos:";
+    if (!efeitos.empty()) {
+        for (const auto& nome : efeitos) {
+            std::cout << ' ';
+            setCorPorNome(nome);
+            std::cout << '[' << nome << ']';
+            resetarCor();
+        }
+    }
+    std::cout << '\n';
     
     std::cout << std::string(40, '-') << '\n';
     std::cout << " [W/A/S/D] Mover   [ESC] Sair\n";
@@ -183,6 +196,21 @@ void Renderer::resetarCor() {
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7); // branco padrão
 #else
     std::cout << "\033[0m"; // reset ANSI
+#endif
+}
+
+void Renderer::setCorPorNome(const std::string& nome) {
+#ifdef _WIN32
+    HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+    if      (nome == "Paralisia")     SetConsoleTextAttribute(h, 14); // amarelo
+    else if (nome == "Veneno")        SetConsoleTextAttribute(h, 10); // verde
+    else if (nome == "Regeneracao")   SetConsoleTextAttribute(h, 11); // ciano
+    else if (nome == "Enfraquecimento") SetConsoleTextAttribute(h, 12); // vermelho
+#else
+    if      (nome == "Paralisia")     std::cout << "\033[33m"; // amarelo
+    else if (nome == "Veneno")        std::cout << "\033[32m"; // verde
+    else if (nome == "Regeneracao")   std::cout << "\033[36m"; // ciano
+    else if (nome == "Enfraquecimento") std::cout << "\033[31m"; // vermelho
 #endif
 }
 

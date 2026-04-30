@@ -7,7 +7,7 @@
 #include <ctime>
 
 Goblin::Goblin(int x, int y, int andar)
-    :Enemy(x, y, 6 + (andar - 1) * 2, 3 + (andar - 1), 1, 10)
+    :Enemy(x, y, 6 + (andar - 1) * 3, 3 + (andar - 1), 1, 10)
 {
     symbol_ = 'g';
 }

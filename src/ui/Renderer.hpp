@@ -54,4 +54,7 @@ private:
 
     // Reseta a cor do console para o padrão (branco)
     void resetarCor();
+
+    // Aplica cor no console baseada no nome de um efeito específico
+    void setCorPorNome(const std::string& nome);
 };
