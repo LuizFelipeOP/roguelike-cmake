@@ -51,9 +51,9 @@ public:
     void tickEfeitos();
     bool isParalisado() const;
     void setParalisado(bool valor);
-    virtual void takeDamage(int quantidade) {}
-    virtual void curar(int quantidade) {}
-    virtual void reduzirDanoAtaque(int quantidade) {}
+    virtual void takeDamage(int) {}
+    virtual void curar(int) {}
+    virtual void reduzirDanoAtaque(int) {}
     
 protected:
     // "protected": acessível pela própria classe E pelas subclasses,
