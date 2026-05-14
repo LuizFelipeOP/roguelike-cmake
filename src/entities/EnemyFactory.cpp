@@ -1,6 +1,7 @@
 #include "EnemyFactory.hpp"
 #include "Goblin.hpp"
 #include "Troll.hpp"
+#include "Orc.hpp"
 #include <numeric>
 
 // ─────────────────────────────────────────────────────────────────
@@ -17,8 +18,9 @@
 // ─────────────────────────────────────────────────────────────────
 static const std::vector<SpawnEntry> tabelaSpawn = {
     //  tipo               andar 1-2  andar 3-4  andar 5-6  andar 7+
-    { EnemyType::Goblin,      90,        70,        50,        30 },
-    { EnemyType::Troll,       10,        30,        50,        70 },
+    { EnemyType::Goblin,      90,        70,        40,        10 },
+    { EnemyType::Troll,       10,        20,        40,        50 },
+    { EnemyType::Orc,          0,        00,        20,        40 },
 };
 
 // Retorna o peso correto da entrada para o andar atual
@@ -58,8 +60,8 @@ std::unique_ptr<Enemy> EnemyFactory::create(EnemyType type, int x, int y, int an
         return std::make_unique<Goblin>(x, y, andar);
     case EnemyType::Troll:
         return std::make_unique<Troll>(x, y, andar);
-    // case EnemyType::Orc:
-    //     return std::make_unique<Orc>(x, y, andar);
+    case EnemyType::Orc:
+        return std::make_unique<Orc>(x, y, andar);
     default:
         return nullptr;
     }

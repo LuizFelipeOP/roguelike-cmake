@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Entity.hpp"
+#include "ia/IAStrategy.hpp"
 class Map;
 class Player;
 
@@ -15,7 +16,7 @@ public:
     void update() override {}
 
     // IA do inimigo — chamada pelo Game a cada turno
-    virtual void update(Map& map, Player& player) = 0;
+    virtual void update(Map& map, Player& player);
 
     int getHp()      const;
     int getAttack()  const;
@@ -28,11 +29,18 @@ public:
     bool isAlive() const;
     void curar(int quantidade) override;
     void reduzirDanoAtaque(int quantidade) override;
+    void setIA(std::unique_ptr<IAStrategy> ia);
+    void moverPara(int x, int y);
+    int getMaxHP() const;
 
 
 private:
+    int maxHp_;    // Vida total
     int hp_;       // Vida atual
     int attack_;   // Poder de ataque
     int defense_;  // Poder de defesa
     int xp_;        // XP de cada inimigo
+
+    std::unique_ptr<IAStrategy> ia_;
+
 };
