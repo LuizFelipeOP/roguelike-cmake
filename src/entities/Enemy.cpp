@@ -2,6 +2,7 @@
 #include "map/Map.hpp"
 #include "Player.hpp"
 #include <algorithm> 
+#include "ia/FugirStrategy.hpp"
 
 Enemy::Enemy(int x, int y, int hp, int attack, int defense, int xp)
     : Entity(x, y)
@@ -48,4 +49,9 @@ void Enemy::update(Map& map, Player& player) {
 
 int Enemy::getMaxHP() const {
     return maxHp_;
+}
+
+IAEstado Enemy::getIAEstado() const {
+    if (dynamic_cast<FugirStrategy*>(ia_.get())) return IAEstado::Fugindo;
+    return IAEstado::Perseguindo;
 }

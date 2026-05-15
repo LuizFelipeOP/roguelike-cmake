@@ -98,6 +98,9 @@ void Map::carveVerticalCorridor(int y1, int y2, int x) {
 // -------------------------------------------------------------
 void Map::generate(unsigned int seed) {
     rooms_.clear();
+
+    seed_ = (seed == 0) ? static_cast<unsigned int>(time(nullptr)) : seed;
+
     fill('#');
     for (auto& row : explored_)
         std::fill(row.begin(), row.end(), false);

@@ -44,6 +44,17 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(doctest)
 
+# ─────────────────────────────────────────────
+# Salvamento em JSON — nlohmann_json via FetchContent
+# ─────────────────────────────────────────────
+
+FetchContent_Declare(
+    nlohmann_json
+    URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.hpp
+    DOWNLOAD_NO_EXTRACT TRUE
+)
+FetchContent_MakeAvailable(nlohmann_json)
+
 enable_testing()
 
 # Sources de produção reutilizadas nos testes — exclui main.cpp para evitar

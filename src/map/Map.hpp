@@ -34,6 +34,8 @@ public:
     Point getPosicaoEscada() const;
     void desenharEscada(int x, int y);
 
+    unsigned int getSeed() const;
+
 private:
     int width_;
     int height_;
@@ -58,4 +60,5 @@ private:
     //posição da escada gerada em generated()
     Point escada_;
     
+    unsigned int seed_;
 };

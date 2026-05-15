@@ -112,7 +112,6 @@ void Game::processInput() {
 
 void Game::inicializarAndar(){
     // Gera o dungeon com uma seed baseada no tempo — mapa diferente a cada execução
-    // Na Fase 7 (persistência) vamos salvar a seed para recriar o mesmo dungeon
     map_.generate(static_cast<unsigned int>(time(nullptr)));
     
     Point posEscada = map_.getPosicaoEscada();

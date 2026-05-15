@@ -5,6 +5,8 @@
 class Map;
 class Player;
 
+enum class IAEstado { Perseguindo, Fugindo };
+
 class Enemy : public Entity {
 public:
     // Construtor: posição inicial + atributos base
@@ -33,7 +35,8 @@ public:
     void moverPara(int x, int y);
     int getMaxHP() const;
 
-
+    IAEstado getIAEstado() const;
+    
 private:
     int maxHp_;    // Vida total
     int hp_;       // Vida atual
