@@ -42,9 +42,14 @@ public:
     int getMaxHp()      const;
     int getAttack()     const;
     int getDefense()    const;
+    int getLuck()       const;
     int getXP()         const;
     int getLevel()      const;
     int getXPProxLevel() const;
+    int getBaseAttack()  const;   // attack_ sem bonus de equipamento
+    int getBaseDefense() const;   // defense_ sem bonus de equipamento
+    int getAttackBonus() const;
+    int getDefenseBonus() const;
 
     void takeDamage(int amount) override;
     bool isAlive() const;
@@ -54,6 +59,16 @@ public:
 
     void setAttackBonus(int bonus);
     void setDefenseBonus(int bonus);
+
+    // Setters para restaurar estado ao carregar save
+    void setHp(int valor);
+    void setMaxHp(int valor);
+    void setAttack(int valor);
+    void setDefense(int valor);
+    void setLuck(int valor);
+    void setXP(int valor);
+    void setLevel(int valor);
+    void setXPProxLevel(int valor);
     void adicionarObserver(Observer* obs);
     void notificarObservers();
     Inventario&       getInventario();

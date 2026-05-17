@@ -98,6 +98,9 @@ void Map::carveVerticalCorridor(int y1, int y2, int x) {
 // -------------------------------------------------------------
 void Map::generate(unsigned int seed) {
     rooms_.clear();
+
+    seed_ = (seed == 0) ? static_cast<unsigned int>(time(nullptr)) : seed;
+
     fill('#');
     for (auto& row : explored_)
         std::fill(row.begin(), row.end(), false);
@@ -205,4 +208,16 @@ Point Map::getPosicaoEscada() const {
 // -------------------------------------------------------------
 void Map::desenharEscada(int x, int y) {
     tiles_[y][x] = '>';
+}
+
+const std::vector<std::vector<bool>>& Map::getExplored() const {
+    return explored_;
+}
+
+void Map::setExplored(const std::vector<std::vector<bool>>& explored) {
+    explored_ = explored;
+}
+
+unsigned int Map::getSeed() const {
+    return seed_;
 }

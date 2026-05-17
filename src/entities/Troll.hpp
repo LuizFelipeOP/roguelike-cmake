@@ -7,4 +7,5 @@ class Troll : public Enemy {
 public:
     Troll(int x, int y, int andar);
     int getXPReward() override;
+    std::string getTipoNome() const override { return "Troll"; }
 };

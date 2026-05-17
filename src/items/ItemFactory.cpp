@@ -5,6 +5,7 @@
 #include "AplicarEfeitoStrategy.hpp"
 #include "../effects/RegeneracaoEffect.hpp"
 #include <random>
+#include <string>
 
 
 std::unique_ptr<Item> ItemFactory::create(int x, int y, int andar){
@@ -56,5 +57,29 @@ std::unique_ptr<Item> ItemFactory::create(int x, int y, int andar){
             return std::make_unique<Item>("Amuleto", tipo_aleatorio, ItemSlot::Acessorio, x, y, std::make_unique<BonusDefStrategy>());
         default: return nullptr;
     }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// createByTipo — reconstrói item salvo a partir do nome do tipo (string)
+// ─────────────────────────────────────────────────────────────────────────────
+std::unique_ptr<Item> ItemFactory::createByTipo(const std::string& tipo, int x, int y) {
+    if (tipo == "PocaoDeVidaPequena")
+        return std::make_unique<Item>("Pocao de vida pequena", ItemType::PocaoDeVidaPequena, ItemSlot::Consumivel, x, y, std::make_unique<CuraStrategy>(10));
+    if (tipo == "PocaoDeVida")
+        return std::make_unique<Item>("Pocao de vida", ItemType::PocaoDeVida, ItemSlot::Consumivel, x, y, std::make_unique<CuraStrategy>(20));
+    if (tipo == "PocaoDeForça")
+        return std::make_unique<Item>("Pocao de forca", ItemType::PocaoDeForça, ItemSlot::Consumivel, x, y, std::make_unique<AumentarATKStrategy>(1));
+    if (tipo == "PocaoDeRegeneracao")
+        return std::make_unique<Item>("Pocao de Regeneracao", ItemType::PocaoDeRegeneracao, ItemSlot::Consumivel, x, y,
+            std::make_unique<AplicarEfeitoStrategy>([]{ return std::make_unique<RegeneracaoEffect>(5, 3); }));
+    if (tipo == "Espada")
+        return std::make_unique<Item>("Espada", ItemType::Espada, ItemSlot::Arma, x, y, std::make_unique<AumentarATKStrategy>(2));
+    if (tipo == "EspadaGrande")
+        return std::make_unique<Item>("Espada Grande", ItemType::EspadaGrande, ItemSlot::Arma, x, y, std::make_unique<AumentarATKStrategy>(4));
+    if (tipo == "Armadura")
+        return std::make_unique<Item>("Armadura", ItemType::Armadura, ItemSlot::Armadura, x, y, std::make_unique<BonusDefStrategy>());
+    if (tipo == "Amuleto")
+        return std::make_unique<Item>("Amuleto", ItemType::Amuleto, ItemSlot::Acessorio, x, y, std::make_unique<BonusDefStrategy>());
+    return nullptr;
 }
 

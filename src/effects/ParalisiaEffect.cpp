@@ -16,3 +16,9 @@ bool ParalisiaEffect::isExpired() const {
 std::string ParalisiaEffect::getNome() const {
     return "Paralisia";
 }
+int ParalisiaEffect::getPotencia() const {
+    return 0; // Paralisia não tem potência, apenas duração
+}
+int ParalisiaEffect::getDuracao() const {
+    return duracaoRestante_;
+}

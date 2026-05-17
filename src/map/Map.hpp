@@ -34,6 +34,10 @@ public:
     Point getPosicaoEscada() const;
     void desenharEscada(int x, int y);
 
+    unsigned int getSeed() const;
+    const std::vector<std::vector<bool>>& getExplored() const;
+    void setExplored(const std::vector<std::vector<bool>>& explored);
+
 private:
     int width_;
     int height_;
@@ -58,4 +62,5 @@ private:
     //posição da escada gerada em generated()
     Point escada_;
     
+    unsigned int seed_;
 };

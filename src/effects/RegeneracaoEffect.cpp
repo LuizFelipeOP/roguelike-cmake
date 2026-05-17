@@ -16,3 +16,10 @@ bool RegeneracaoEffect::isExpired() const {
 std::string RegeneracaoEffect::getNome() const {
     return "Regeneracao";
 }
+
+int RegeneracaoEffect::getPotencia() const {
+    return cura_;
+}
+int RegeneracaoEffect::getDuracao() const {
+    return duracaoRestante_;
+}

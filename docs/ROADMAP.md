@@ -111,6 +111,7 @@ Projeto roguelike clássico (inspirado no Rogue de 1980) desenvolvido em C++17 c
 ---
 
 ### Phase 7 — Combate Avançado e Status Effects
+**Status:** Concluída
 **Objetivo:** Tornar o combate mais profundo com efeitos de status.  
 **O que pode ser feito:**
 - Efeitos: veneno, paralisia, regeneração

@@ -1,1 +1,1 @@
-.\build\Debug\roguelike.exe
+.\build\roguelike.exe

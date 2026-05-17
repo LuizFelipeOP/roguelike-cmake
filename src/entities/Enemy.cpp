@@ -2,6 +2,8 @@
 #include "map/Map.hpp"
 #include "Player.hpp"
 #include <algorithm> 
+#include "ia/FugirStrategy.hpp"
+#include "ia/PerseguirStrategy.hpp"
 
 Enemy::Enemy(int x, int y, int hp, int attack, int defense, int xp)
     : Entity(x, y)
@@ -48,4 +50,20 @@ void Enemy::update(Map& map, Player& player) {
 
 int Enemy::getMaxHP() const {
     return maxHp_;
+}
+
+IAEstado Enemy::getIAEstado() const {
+    if (dynamic_cast<FugirStrategy*>(ia_.get())) return IAEstado::Fugindo;
+    return IAEstado::Perseguindo;
+}
+
+void Enemy::setHp(int valor) {
+    hp_ = valor;
+}
+
+void Enemy::setIAEstado(IAEstado estado) {
+    if (estado == IAEstado::Fugindo)
+        ia_ = std::make_unique<FugirStrategy>();
+    else
+        ia_ = std::make_unique<PerseguirStrategy>();
 }

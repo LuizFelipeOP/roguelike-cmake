@@ -8,6 +8,11 @@
 #include <memory>
 #include "entities/EnemyFactory.hpp"
 #include <algorithm> 
+#include "persistence/SaveSystem.hpp"
+#include "effects/VenenoEffect.hpp"
+#include "effects/ParalisiaEffect.hpp"
+#include "effects/RegeneracaoEffect.hpp"
+#include "effects/EnfraquecimentoEffect.hpp"
 
 #ifdef _WIN32
     #include <conio.h>   // _getch() — lê tecla sem precisar apertar Enter (Windows)
@@ -82,6 +87,11 @@ void Game::processInput() {
     // Esc fecha o jogo antes do tolower, pois tolower pode alterar bytes de controle
     if (key == 27) { isRunning_ = false; return; }
 
+    // Salvar/carregar verificados ANTES do tolower:
+    // 'S' (maiúsculo) = 83; após tolower vira 's' = 115 (move sul) — colisão!
+    if (key == 'S') { salvar();   return; }
+    if (key == 'L') { carregar(); return; }
+
     // Converte para minúsculo para aceitar WASD e wasd
     key = static_cast<char>(tolower(key));
 
@@ -106,13 +116,13 @@ void Game::processInput() {
                     descartarItem(next - '1');
             }
             break;
+
         default: break;  // Tecla desconhecida — ignora, não faz nada
     }
 }
 
 void Game::inicializarAndar(){
     // Gera o dungeon com uma seed baseada no tempo — mapa diferente a cada execução
-    // Na Fase 7 (persistência) vamos salvar a seed para recriar o mesmo dungeon
     map_.generate(static_cast<unsigned int>(time(nullptr)));
     
     Point posEscada = map_.getPosicaoEscada();
@@ -338,4 +348,199 @@ void Game::render() {
 void Game::pushMessage(const std::string& message) {
     if(messageLog_.size() == 3) messageLog_.pop_front();
     messageLog_.push_back(message);
+}
+
+void Game::salvar() {
+    static const std::string SAVE_PATH = "savegame.json";
+
+    // ── Helpers de serialização (enum → string) ──────────────────────────────
+    auto itemTipoStr = [](ItemType t) -> std::string {
+        switch (t) {
+            case ItemType::PocaoDeVidaPequena:  return "PocaoDeVidaPequena";
+            case ItemType::PocaoDeVida:         return "PocaoDeVida";
+            case ItemType::PocaoDeForça:        return "PocaoDeForça";
+            case ItemType::PocaoDeRegeneracao:  return "PocaoDeRegeneracao";
+            case ItemType::Espada:              return "Espada";
+            case ItemType::EspadaGrande:        return "EspadaGrande";
+            case ItemType::Armadura:            return "Armadura";
+            case ItemType::Amuleto:             return "Amuleto";
+            default:                            return "Desconhecido";
+        }
+    };
+    auto itemSlotStr = [](ItemSlot s) -> std::string {
+        switch (s) {
+            case ItemSlot::Arma:       return "Arma";
+            case ItemSlot::Armadura:   return "Armadura";
+            case ItemSlot::Acessorio:  return "Acessorio";
+            case ItemSlot::Consumivel: return "Consumivel";
+            default:                   return "Consumivel";
+        }
+    };
+
+    GameMemento m;
+
+    // ── Player ───────────────────────────────────────────────────────────────
+    m.player.x            = player_.getX();
+    m.player.y            = player_.getY();
+    m.player.hp           = player_.getHp();
+    m.player.maxHp        = player_.getMaxHp();
+    m.player.attack       = player_.getBaseAttack();
+    m.player.defense      = player_.getBaseDefense();
+    m.player.luck         = player_.getLuck();
+    m.player.xp           = player_.getXP();
+    m.player.level        = player_.getLevel();
+    m.player.xpProxLevel  = player_.getXPProxLevel();
+    m.player.attackBonus  = player_.getAttackBonus();
+    m.player.defenseBonus = player_.getDefenseBonus();
+    for (const auto& ef : player_.getEfeitos())
+        m.player.efeitos.push_back({ ef->getNome(), ef->getDuracao(), ef->getPotencia() });
+
+    // ── Inventário (consumíveis não equipados) ────────────────────────────────
+    for (const auto& item : player_.getInventario().getConsumiveis()) {
+        ItemMemento im;
+        im.tipo     = itemTipoStr(item->getTipo());
+        im.x = -1; im.y = -1;
+        im.equipado = false;
+        im.slot     = itemSlotStr(item->getSlot());
+        m.itensInventario.push_back(im);
+    }
+    // Itens equipados
+    for (ItemSlot s : {ItemSlot::Arma, ItemSlot::Armadura, ItemSlot::Acessorio}) {
+        const Item* eq = player_.getInventario().getEquipado(s);
+        if (eq) {
+            ItemMemento im;
+            im.tipo     = itemTipoStr(eq->getTipo());
+            im.x = -1; im.y = -1;
+            im.equipado = true;
+            im.slot     = itemSlotStr(eq->getSlot());
+            m.itensInventario.push_back(im);
+        }
+    }
+
+    // ── Itens no chão ────────────────────────────────────────────────────────
+    for (const auto& item : items_) {
+        ItemMemento im;
+        im.tipo     = itemTipoStr(item->getTipo());
+        im.x        = item->getX();
+        im.y        = item->getY();
+        im.equipado = false;
+        im.slot     = itemSlotStr(item->getSlot());
+        m.itensMapa.push_back(im);
+    }
+
+    // ── Inimigos ─────────────────────────────────────────────────────────────
+    for (const auto& enemy : enemies_) {
+        EnemyMemento em;
+        em.tipo     = enemy->getTipoNome();
+        em.x        = enemy->getX();
+        em.y        = enemy->getY();
+        em.hp       = enemy->getHp();
+        em.iaEstado = (enemy->getIAEstado() == IAEstado::Fugindo) ? "Fugindo" : "Perseguindo";
+        for (const auto& ef : enemy->getEfeitos())
+            em.efeitos.push_back({ ef->getNome(), ef->getDuracao(), ef->getPotencia() });
+        m.inimigos.push_back(em);
+    }
+
+    // ── Mapa ─────────────────────────────────────────────────────────────────
+    Point escada       = map_.getPosicaoEscada();
+    m.mapa.seed        = map_.getSeed();
+    m.mapa.andar       = andarAtual_;
+    m.mapa.explored    = map_.getExplored();
+    m.mapa.escadaX     = escada.x;
+    m.mapa.escadaY     = escada.y;
+
+    SaveSystem::escrever(m, SAVE_PATH);
+    pushMessage("Jogo salvo!");
+}
+
+void Game::carregar() {
+    static const std::string SAVE_PATH = "savegame.json";
+
+    if (!SaveSystem::existeSave(SAVE_PATH)) {
+        pushMessage("Nenhum save encontrado.");
+        return;
+    }
+
+    GameMemento m = SaveSystem::ler(SAVE_PATH);
+
+    // ── Helper: EfeitoMemento → StatusEffect ─────────────────────────────────
+    auto criarEfeito = [](const EfeitoMemento& ef) -> std::unique_ptr<StatusEffect> {
+        if (ef.tipo == "Veneno")           return std::make_unique<VenenoEffect>(ef.potencia, ef.duracaoRestante);
+        if (ef.tipo == "Paralisia")        return std::make_unique<ParalisiaEffect>(ef.duracaoRestante);
+        if (ef.tipo == "Regeneracao")      return std::make_unique<RegeneracaoEffect>(ef.potencia, ef.duracaoRestante);
+        if (ef.tipo == "Enfraquecimento")  return std::make_unique<EnfraquecimentoEffect>(ef.potencia, ef.duracaoRestante);
+        return nullptr;
+    };
+
+    // ── Helper: string → EnemyType ───────────────────────────────────────────
+    auto enemyTipo = [](const std::string& s) -> EnemyType {
+        if (s == "Troll") return EnemyType::Troll;
+        if (s == "Orc")   return EnemyType::Orc;
+        return EnemyType::Goblin;
+    };
+
+    // ── Restaurar mapa (reconstrói o layout a partir da seed) ────────────────
+    map_.generate(m.mapa.seed);
+    map_.setExplored(m.mapa.explored);
+    andarAtual_ = m.mapa.andar;
+
+    // ── Restaurar player ─────────────────────────────────────────────────────
+    player_.setPosition(m.player.x, m.player.y);
+    player_.setHp(m.player.hp);
+    player_.setMaxHp(m.player.maxHp);
+    player_.setAttack(m.player.attack);
+    player_.setDefense(m.player.defense);
+    player_.setLuck(m.player.luck);
+    player_.setXP(m.player.xp);
+    player_.setLevel(m.player.level);
+    player_.setXPProxLevel(m.player.xpProxLevel);
+    player_.setAttackBonus(m.player.attackBonus);
+    player_.setDefenseBonus(m.player.defenseBonus);
+    player_.limparEfeitos();
+    for (const auto& ef : m.player.efeitos) {
+        auto efeito = criarEfeito(ef);
+        if (efeito) player_.adicionarEfeito(std::move(efeito));
+    }
+
+    // ── Restaurar inimigos ───────────────────────────────────────────────────
+    enemies_.clear();
+    for (const auto& em : m.inimigos) {
+        auto enemy = EnemyFactory::create(enemyTipo(em.tipo), em.x, em.y, andarAtual_);
+        enemy->setHp(em.hp);
+        if (em.iaEstado == "Fugindo") enemy->setIAEstado(IAEstado::Fugindo);
+        enemy->limparEfeitos();
+        for (const auto& ef : em.efeitos) {
+            auto efeito = criarEfeito(ef);
+            if (efeito) enemy->adicionarEfeito(std::move(efeito));
+        }
+        enemies_.push_back(std::move(enemy));
+    }
+
+    // ── Restaurar itens no chão ──────────────────────────────────────────────
+    items_.clear();
+    for (const auto& im : m.itensMapa) {
+        auto item = ItemFactory::createByTipo(im.tipo, im.x, im.y);
+        if (item) items_.push_back(std::move(item));
+    }
+
+    // ── Restaurar inventário ─────────────────────────────────────────────────
+    auto& inv = player_.getInventario();
+    inv.limpar();
+
+    // Equipados primeiro (adicionarItem → equip slot diretamente via adicionarItem)
+    for (const auto& im : m.itensInventario) {
+        if (!im.equipado) continue;
+        auto item = ItemFactory::createByTipo(im.tipo, -1, -1);
+        if (!item) continue;
+        // adicionarItem de arma/armadura/acessorio vai direto ao slot (não consumível)
+        inv.adicionarItem(std::move(item));
+    }
+    // Consumíveis depois
+    for (const auto& im : m.itensInventario) {
+        if (im.equipado) continue;
+        auto item = ItemFactory::createByTipo(im.tipo, -1, -1);
+        if (item) inv.adicionarItem(std::move(item));
+    }
+
+    pushMessage("Jogo carregado!");
 }

@@ -44,6 +44,8 @@ public:
 
     void adicionarEfeito(std::unique_ptr<StatusEffect> efeito);
     std::vector<std::string> getEfeitosNomes() const;
+    const std::vector<std::unique_ptr<StatusEffect>>& getEfeitos() const;
+    void limparEfeitos();
 
     // Callback chamado ao aplicar ou expirar um efeito — configurado externamente
     // Mesmo padrão do onDescarte no Inventario

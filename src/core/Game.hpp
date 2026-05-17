@@ -63,6 +63,8 @@ private:
     void equiparSelecionado(); //pega primeiro consumivel do inventario e equipa no slot correspondente, e notifica observers
     void desequiparSelecionado(); //tenta desequipar arma → armadura → acessório (o primeiro que encontrar), notifica observers
 
+    void salvar();   // Salva o estado atual do jogo
+    void carregar(); // Carrega o estado salvo do jogo
 protected:
     // Métodos protegidos para permitir override e acesso em testes via subclasse
     virtual void render();  // Pede ao Renderer que desenhe o estado atual
