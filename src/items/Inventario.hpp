@@ -24,6 +24,7 @@ class Inventario {
         Item* getEquipado(ItemSlot slot) const;             //retorna item equipado
         const std::vector<std::unique_ptr<Item>>& getConsumiveis() const; //retorna todos os consumiveis
         bool cheio(ItemSlot slot) const;            //retorna se inventario esta totalmente cheio
+        void limpar();                              // reseta todo o inventário (usado ao carregar save)
 
         // ItemType tipo, 
         // ItemSlot slot,

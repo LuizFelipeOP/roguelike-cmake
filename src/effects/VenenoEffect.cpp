@@ -16,3 +16,10 @@ bool VenenoEffect::isExpired() const {
 std::string VenenoEffect::getNome() const {
     return "Veneno";
 }
+
+int VenenoEffect::getPotencia() const {
+    return dano_;
+}
+int VenenoEffect::getDuracao() const {
+    return duracaoRestante_;
+}

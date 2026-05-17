@@ -73,9 +73,14 @@ int Player::getHp()             const { return hp_; }
 int Player::getMaxHp()          const { return maxHp_; }
 int Player::getAttack()         const { return attack_ + attackBonus_; }
 int Player::getDefense()        const { return defense_ + defenseBonus_; }
+int Player::getLuck()           const { return luck_; }
 int Player::getXP()             const { return xp_; }
 int Player::getLevel()          const { return level_; }
 int Player::getXPProxLevel()    const { return xpProxLevel_; }
+int Player::getBaseAttack()     const { return attack_; }
+int Player::getBaseDefense()    const { return defense_; }
+int Player::getAttackBonus()    const { return attackBonus_; }
+int Player::getDefenseBonus()   const { return defenseBonus_; }
 //adiciona xp ao jogador
 std::string Player::addXP(int xpRecebido){
     xp_ = xp_ + xpRecebido;
@@ -141,6 +146,15 @@ void Player::raiseLuck() {
 void Player::setAttackBonus(int bonus) { attackBonus_ = bonus; }
 
 void Player::setDefenseBonus(int bonus) { defenseBonus_ = bonus;}
+
+void Player::setHp(int valor)          { hp_ = valor; }
+void Player::setMaxHp(int valor)       { maxHp_ = valor; }
+void Player::setAttack(int valor)      { attack_ = valor; }
+void Player::setDefense(int valor)     { defense_ = valor; }
+void Player::setLuck(int valor)        { luck_ = valor; }
+void Player::setXP(int valor)          { xp_ = valor; }
+void Player::setLevel(int valor)       { level_ = valor; }
+void Player::setXPProxLevel(int valor) { xpProxLevel_ = valor; }
 
 void Player::adicionarObserver(Observer* obs) {
     for (auto* o : observers_)

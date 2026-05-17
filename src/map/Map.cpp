@@ -209,3 +209,15 @@ Point Map::getPosicaoEscada() const {
 void Map::desenharEscada(int x, int y) {
     tiles_[y][x] = '>';
 }
+
+const std::vector<std::vector<bool>>& Map::getExplored() const {
+    return explored_;
+}
+
+void Map::setExplored(const std::vector<std::vector<bool>>& explored) {
+    explored_ = explored;
+}
+
+unsigned int Map::getSeed() const {
+    return seed_;
+}

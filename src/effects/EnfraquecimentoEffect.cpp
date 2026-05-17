@@ -16,3 +16,10 @@ bool EnfraquecimentoEffect::isExpired() const {
 std::string EnfraquecimentoEffect::getNome() const {
     return "Enfraquecimento";
 }
+
+int EnfraquecimentoEffect::getPotencia() const {
+    return reducaoDano_;
+}
+int EnfraquecimentoEffect::getDuracao() const {
+    return duracaoRestante_;
+}

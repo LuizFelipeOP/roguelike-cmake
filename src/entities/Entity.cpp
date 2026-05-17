@@ -72,3 +72,12 @@ void Entity::setParalisado(bool valor) {
     paralisado_ = valor;
 }
 
+const std::vector<std::unique_ptr<StatusEffect>>& Entity::getEfeitos() const {
+    return efeitos_;
+}
+
+void Entity::limparEfeitos() {
+    efeitos_.clear();
+    paralisado_ = false;
+}
+

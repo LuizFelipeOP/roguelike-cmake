@@ -35,6 +35,8 @@ public:
     void desenharEscada(int x, int y);
 
     unsigned int getSeed() const;
+    const std::vector<std::vector<bool>>& getExplored() const;
+    void setExplored(const std::vector<std::vector<bool>>& explored);
 
 private:
     int width_;

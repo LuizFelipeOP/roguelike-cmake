@@ -26,6 +26,7 @@ public:
 
     virtual int getXPReward() = 0;
     int getXP() const;
+    virtual std::string getTipoNome() const = 0;  // "Goblin", "Troll", "Orc"
     
     void takeDamage(int amount) override;
     bool isAlive() const;
@@ -34,6 +35,8 @@ public:
     void setIA(std::unique_ptr<IAStrategy> ia);
     void moverPara(int x, int y);
     int getMaxHP() const;
+    void setHp(int valor);
+    void setIAEstado(IAEstado estado);
 
     IAEstado getIAEstado() const;
     

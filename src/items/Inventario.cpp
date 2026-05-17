@@ -96,3 +96,10 @@ std::unique_ptr<Item>& Inventario::slotRef(ItemSlot slot) {
         default: return arma_;
     }
 }
+
+void Inventario::limpar() {
+    arma_.reset();
+    armadura_.reset();
+    acessorio_.reset();
+    consumiveis_.clear();
+}
