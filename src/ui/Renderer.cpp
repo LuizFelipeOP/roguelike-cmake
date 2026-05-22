@@ -1,39 +1,17 @@
-// Renderer.cpp — Implementação da renderização no console
-
 #include "ui/Renderer.hpp"
 #include <iostream>
 #include <string>
 
 #ifdef _WIN32
-    // No Windows usamos system("cls") para limpar a tela
     #include <windows.h>
 #endif
 
-void Renderer::clearScreen() {
-#ifdef _WIN32
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-
-    // Oculta o cursor piscante
-    CONSOLE_CURSOR_INFO cursorInfo = {1, FALSE};
-    SetConsoleCursorInfo(hConsole, &cursorInfo);
-
-    // Descobre o tamanho atual do buffer do console
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-    GetConsoleScreenBufferInfo(hConsole, &csbi);
-    DWORD tamanho = csbi.dwSize.X * csbi.dwSize.Y;
-
-    // Preenche todo o buffer com espaços a partir do topo — sem flash
-    COORD origem = {0, 0};
-    DWORD escrito;
-    FillConsoleOutputCharacter(hConsole, ' ', tamanho, origem, &escrito);
-    FillConsoleOutputAttribute(hConsole, csbi.wAttributes, tamanho, origem, &escrito);
-
-    // Reposiciona o cursor no topo
-    SetConsoleCursorPosition(hConsole, origem);
-#else
-    // No Linux/Mac usamos sequência ANSI
-    std::cout << "\033[2J\033[H";
-#endif
+static Cor corDoEfeito(const std::string& nome) {
+    if (nome == "Paralisia")       return Cor::Amarelo;
+    if (nome == "Veneno")          return Cor::Verde;
+    if (nome == "Regeneracao")     return Cor::Ciano;
+    if (nome == "Enfraquecimento") return Cor::Vermelho;
+    return Cor::Padrao;
 }
 
 void Renderer::render(
@@ -45,172 +23,205 @@ void Renderer::render(
         bool inventarioAberto,
         int andarAtual
     ) {
-    clearScreen();
+    console_.ocultarCursor();
+    console_.limpar();  // move cursor para (0,0) — sem apagar, sem flicker
 
-    // Iteramos o mapa linha por linha (y = linha, x = coluna)
+    // Mapa: largura fixa, '\n' simples é suficiente
     for (int y = 0; y < map.getHeight(); ++y) {
         for (int x = 0; x < map.getWidth(); ++x) {
-            
-            
-            // Se a posição do jogador coincide com este tile, desenhamos o jogador
             if (x == player.getX() && y == player.getY()) {
                 auto nomes = player.getEfeitosNomes();
                 setCorEfeito(nomes);
                 std::cout << player.getSymbol();
-                resetarCor();
+                console_.resetColor();
                 continue;
             }
             
-            if (map.isExplored(x, y)){
+            if (map.isExplored(x, y)) {
                 bool hadEnemy = false;
                 for (const auto& enemy : enemies) {
-                    if(enemy->isAlive() && enemy->getX() == x && enemy->getY() == y){
+                    if (enemy->isAlive() && enemy->getX() == x && enemy->getY() == y) {
                         std::cout << enemy->getSymbol();
                         hadEnemy = true;
                         break;
                     }
-
                 }
 
                 bool hadItem = false;
-                for (const auto& item : items){
-                    if(item->getX() == x && item->getY() == y){
+                for (const auto& item : items) {
+                    if (item->getX() == x && item->getY() == y) {
                         std::cout << item->getSymbol();
                         hadItem = true;
                     }
                 }
-                if (!hadEnemy && !hadItem) {
+                if (!hadEnemy && !hadItem)
                     std::cout << map.getTile(x, y);
-                }
-
-                
-            }else{
-                 std::cout << ' ';
-                 continue;
+            } else {
+                std::cout << ' ';
             }
-            
         }
-        // Quebra de linha ao fim de cada linha do mapa
-        std::cout << '\n';
+        // Linha do mapa: largura fixa — novaLinha() garante limpeza do resto
+        console_.novaLinha();
     }
-    // Desenha o HUD logo abaixo do mapa
+
     renderHUD(player, messageLog, inventarioAberto, andarAtual);
 }
 
-void Renderer::renderHUD(const Player& player, const std::deque<std::string>& messageLog, bool inventarioAberto, int  andarAtual) {
-
-    if(inventarioAberto) {
+void Renderer::renderHUD(const Player& player, const std::deque<std::string>& messageLog, bool inventarioAberto, int andarAtual) {
+    if (inventarioAberto) {
         renderInventario(player.getInventario());
         return;
-    };
+    }
 
-    // Linha separadora
-    std::cout << std::string(40, '-') << '\n';
+    // Todas as linhas do HUD usam novaLinha() para sobrescrever artefatos de frames anteriores
+    std::cout << std::string(40, '-');
+    console_.novaLinha();
 
-    // HP em formato "HP: atual/maximo"
     std::cout << " Level: " << player.getLevel();
     std::cout << " XP: " << player.getXP() << "/" << player.getXPProxLevel();
     std::cout << " Andar: " << andarAtual;
-    std::cout << '\n';
-    
+    console_.novaLinha();
+
     std::cout << " HP: " << player.getHp() << "/" << player.getMaxHp();
     std::cout << "   ATK: " << player.getAttack();
     std::cout << "   DEF: " << player.getDefense();
-    std::cout << '\n';
+    console_.novaLinha();
 
-    // Linha de efeitos ativos — só exibe se houver algum
     auto efeitos = player.getEfeitosNomes();
     std::cout << " Efeitos:";
     if (!efeitos.empty()) {
         for (const auto& nome : efeitos) {
             std::cout << ' ';
-            setCorPorNome(nome);
+            console_.setColor(corDoEfeito(nome));
             std::cout << '[' << nome << ']';
-            resetarCor();
+            console_.resetColor();
         }
     }
-    std::cout << '\n';
-    
-    std::cout << std::string(40, '-') << '\n';
-    std::cout << " [W/A/S/D] Mover   [ESC] Sair\n";
+    console_.novaLinha();
+
+    std::cout << std::string(40, '-');
+    console_.novaLinha();
+    std::cout << " [W/A/S/D] Mover   [ESC] Sair";
+    console_.novaLinha();
 
     for (const auto& message : messageLog) {
         std::cout << message;
-        std::cout << '\n';
+        console_.novaLinha();
     }
+
+    // Linhas em branco para sobrescrever resíduos do inventário (que tem ~16 linhas vs ~9 do HUD)
+    for (int i = 0; i < 8; ++i) console_.novaLinha();
 }
 
-void Renderer::renderInventario(const Inventario& inv) {    // Linha separadora
-    std::cout << std::string(40, '-') << '\n';
-    std::cout << std::string("=== INVENTARIO ===");
-    std::cout << std::string(40, '-') << '\n';
-    std::cout << " Equipados:\n";
+void Renderer::renderInventario(const Inventario& inv) {
+    std::cout << std::string(40, '-');
+    console_.novaLinha();
+    std::cout << "=== INVENTARIO ===";
+    console_.novaLinha();
+    std::cout << std::string(40, '-');
+    console_.novaLinha();
+    std::cout << " Equipados:";
+    console_.novaLinha();
 
-    auto printSlot = [&](const char* label, ItemSlot slot){
+    auto printSlot = [&](const char* label, ItemSlot slot) {
         Item* item = inv.getEquipado(slot);
-        std::cout << "   " << label << (item ? item->getNome() : "--") << '\n';
+        std::cout << "   " << label << (item ? item->getNome() : "--");
+        console_.novaLinha();
     };
-    printSlot("Arma: ", ItemSlot::Arma);
+    printSlot("Arma: ",     ItemSlot::Arma);
     printSlot("Armadura: ", ItemSlot::Armadura);
-    printSlot("Acessorio: ", ItemSlot::Acessorio);
+    printSlot("Acessorio: ",ItemSlot::Acessorio);
 
-    std::cout << "\n Consumiveis:\n";
+    std::cout << " Consumiveis:";
+    console_.novaLinha();
     const auto& cons = inv.getConsumiveis();
-    for (int i = 0; i < 5; i++)
-    {
-        std::cout << " ["<< (i + 1) << "] ";
+    for (int i = 0; i < 5; i++) {
+        std::cout << " [" << (i + 1) << "] ";
         if (i < static_cast<int>(cons.size()))
-        {
             std::cout << cons[i]->getNome();
-        } else 
+        else
             std::cout << "--";
-        std::cout << "\n";
-        
+        console_.novaLinha();
     }
-    std::cout << std::string(40, '-') << '\n';
-    std::cout << " [1-5] Usar  [E] Equipar  [X] Desequipar  [I] Fechar\n";
-    std::cout << std::string(40, '-') << '\n';
+
+    std::cout << std::string(40, '-');
+    console_.novaLinha();
+    std::cout << " [1-5] Usar  [E] Equipar  [X] Desequipar  [I] Fechar";
+    console_.novaLinha();
+    std::cout << std::string(40, '-');
+    console_.novaLinha();
 }
 
 void Renderer::setCorEfeito(const std::vector<std::string>& nomes) {
-    // Prioridade: Paralisia (amarelo) > Veneno (verde) > padrão (sem mudança)
     bool temParalisia = false;
     bool temVeneno    = false;
     for (const auto& nome : nomes) {
         if (nome == "Paralisia") temParalisia = true;
         if (nome == "Veneno")    temVeneno    = true;
     }
-
-#ifdef _WIN32
-    HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
-    if      (temParalisia) SetConsoleTextAttribute(h, 14); // amarelo
-    else if (temVeneno)    SetConsoleTextAttribute(h, 10); // verde
-#else
-    if      (temParalisia) std::cout << "\033[33m"; // amarelo ANSI
-    else if (temVeneno)    std::cout << "\033[32m"; // verde ANSI
-#endif
+    if      (temParalisia) console_.setColor(Cor::Amarelo);
+    else if (temVeneno)    console_.setColor(Cor::Verde);
 }
 
-void Renderer::resetarCor() {
-#ifdef _WIN32
-    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7); // branco padrão
-#else
-    std::cout << "\033[0m"; // reset ANSI
-#endif
+void Renderer::renderMenu(bool temSave) {
+    console_.limparTotal();
+    console_.setColor(Cor::Magenta);
+    std::cout << "╔══════════════════════════════════════╗\n";
+    std::cout << "║          ROGUELIKE  v0.9             ║\n";
+    std::cout << "╠══════════════════════════════════════╣\n";
+    console_.resetColor();
+    std::cout << "║  [N] Nova Partida                    ║\n";
+    if (temSave) {
+        std::cout << "║  [C] Carregar Jogo                   ║\n";
+    } else {
+        std::cout << "║  [C] Carregar Jogo  (sem save)       ║\n";
+    }
+    std::cout << "║  [ESC] Sair                          ║\n";
+    console_.setColor(Cor::Magenta);
+    std::cout << "╚══════════════════════════════════════╝\n";
+    console_.resetColor();
 }
 
-void Renderer::setCorPorNome(const std::string& nome) {
-#ifdef _WIN32
-    HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
-    if      (nome == "Paralisia")     SetConsoleTextAttribute(h, 14); // amarelo
-    else if (nome == "Veneno")        SetConsoleTextAttribute(h, 10); // verde
-    else if (nome == "Regeneracao")   SetConsoleTextAttribute(h, 11); // ciano
-    else if (nome == "Enfraquecimento") SetConsoleTextAttribute(h, 12); // vermelho
-#else
-    if      (nome == "Paralisia")     std::cout << "\033[33m"; // amarelo
-    else if (nome == "Veneno")        std::cout << "\033[32m"; // verde
-    else if (nome == "Regeneracao")   std::cout << "\033[36m"; // ciano
-    else if (nome == "Enfraquecimento") std::cout << "\033[31m"; // vermelho
-#endif
+void Renderer::renderTelaDerrota(int andar, int nivel, int xp, int inimigos) {
+    console_.limparTotal();
+    console_.setColor(Cor::Vermelho);
+    std::cout << "╔══════════════════════════════════════╗\n";
+    std::cout << "║           VOCE MORREU                ║\n";
+    std::cout << "╠══════════════════════════════════════╣\n";
+    console_.resetColor();
+    std::cout << "║  Andar alcancado:   " << andar    << "\n";
+    std::cout << "║  Nivel final:       " << nivel    << "\n";
+    std::cout << "║  XP acumulado:      " << xp       << "\n";
+    std::cout << "║  Inimigos mortos:   " << inimigos << "\n";
+    console_.setColor(Cor::Vermelho);
+    std::cout << "╠══════════════════════════════════════╣\n";
+    console_.resetColor();
+    std::cout << "║  [qualquer tecla] -> Menu            ║\n";
+    console_.setColor(Cor::Vermelho);
+    std::cout << "╚══════════════════════════════════════╝\n";
+    console_.resetColor();
 }
 
+void Renderer::renderHistorico(const std::vector<std::string>& historico) {
+    console_.limparTotal();
+    console_.setColor(Cor::AzulClaro);
+    std::cout << "╔══════════════════════════════════════╗\n";
+    std::cout << "║       HISTORICO DE MENSAGENS         ║\n";
+    std::cout << "╠══════════════════════════════════════╣\n";
+    console_.resetColor();
+
+    const int MAX_LINHAS = 20;
+    int inicio = static_cast<int>(historico.size()) - MAX_LINHAS;
+    if (inicio < 0) inicio = 0;
+    for (int i = inicio; i < static_cast<int>(historico.size()); ++i) {
+        std::cout << "  > " << historico[i] << '\n';
+    }
+
+    console_.setColor(Cor::AzulClaro);
+    std::cout << "╠══════════════════════════════════════╣\n";
+    console_.resetColor();
+    std::cout << "  [H / ESC] Fechar\n";
+    console_.setColor(Cor::AzulClaro);
+    std::cout << "╚══════════════════════════════════════╝\n";
+    console_.resetColor();
+}

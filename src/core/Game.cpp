@@ -24,6 +24,8 @@
 #include <deque>
 // Função auxiliar: lê uma tecla sem aguardar Enter
 // Encapsula a diferença entre Windows e Linux
+static const std::string SAVE_PATH = "savegame.json";
+
 static char readKey() {
 #ifdef _WIN32
     return static_cast<char>(_getch());
@@ -42,6 +44,9 @@ static char readKey() {
 
 Game::Game()
     : isRunning_(true)
+    , estado_(EstadoJogo::Menu)
+    , inimigosDestruidos_(0)
+    , historicoLog_()
     , map_(60, 22)        // Mapa maior para caber mais salas
     , player_(2, 2)       // Posição inicial fixa — será ajustada após generate()
     , renderer_()
@@ -61,63 +66,94 @@ Game::Game()
     player_.onEfeitoEvento = [this](const std::string& msg){
         pushMessage(msg);
     };
-    
-    inicializarAndar();
+    // NÃO chama inicializarAndar() aqui — o andar só inicia ao escolher "Nova Partida"
 }
 
 void Game::run() {
-    // O loop de turno do roguelike:
-    // Diferente de um jogo de tempo real, só processamos quando o jogador age.
-    // O mundo "para" enquanto o jogador pensa — característica central do roguelike.
     while (isRunning_) {
-        render();        // 1. Mostra o estado atual
-        processInput();  // 2. Espera e lê a ação do jogador
-        update();        // 3. Atualiza o mundo em resposta à ação
+        render();
+        processInput();
+        if (estado_ == EstadoJogo::Jogando)
+            update();
     }
-    if (!player_.isAlive()) {
-        std::cout << "\nVoce morreu... Tente novamente!\n";
-    }else{
-        std::cout << "\nAte a proxima aventura!\n";
-    }
+    std::cout << "\nAte a proxima aventura!\n";
 }
 
 void Game::processInput() {
     char key = readKey();
 
-    // Esc fecha o jogo antes do tolower, pois tolower pode alterar bytes de controle
-    if (key == 27) { isRunning_ = false; return; }
+    switch (estado_) {
 
-    // Salvar/carregar verificados ANTES do tolower:
-    // 'S' (maiúsculo) = 83; após tolower vira 's' = 115 (move sul) — colisão!
-    if (key == 'S') { salvar();   return; }
-    if (key == 'L') { carregar(); return; }
-
-    // Converte para minúsculo para aceitar WASD e wasd
-    key = static_cast<char>(tolower(key));
-
-    switch (key) {
-        case 'w': player_.move( 0, -1, map_, enemies_); break;  // cima
-        case 's': player_.move( 0,  1, map_, enemies_); break;  // baixo
-        case 'a': player_.move(-1,  0, map_, enemies_); break;  // esquerda
-        case 'd': player_.move( 1,  0, map_, enemies_); break;  // direita
-
-        case 'g': coletarItem(); break;
-        case 'u': usarConsumivel(); break;
-        case 'i': inventarioAberto_ = !inventarioAberto_; break;
-        case '1': case '2': case '3': case '4': case '5':
-            if (inventarioAberto_) usarConsumivelInventario(key - '1'); break;
-
-        case 'e': if (inventarioAberto_) equiparSelecionado(); break;
-        case 'x': if (inventarioAberto_) desequiparSelecionado(); break; 
-        case 'r':
-            if (inventarioAberto_) {
-                char next = readKey();
-                if (next >= '1' && next <= '5')
-                    descartarItem(next - '1');
+        case EstadoJogo::Menu:
+            if (key == 27) { isRunning_ = false; return; }
+            if (key == 'n' || key == 'N') {
+                inimigosDestruidos_ = 0;
+                historicoLog_.clear();
+                messageLog_.clear();
+                player_ = Player(2, 2);
+                player_.adicionarObserver(&statsObserver_);
+                player_.getInventario().onDescarte = [this](const std::string& msg){
+                    logObserver_.onEvent(msg);
+                };
+                player_.onEfeitoEvento = [this](const std::string& msg){
+                    pushMessage(msg);
+                };
+                andarAtual_ = 1;
+                enemies_.clear();
+                items_.clear();
+                inicializarAndar();
+                estado_ = EstadoJogo::Jogando;
             }
-            break;
+            if (key == 'c' || key == 'C') {
+                if (SaveSystem::existeSave(SAVE_PATH)) {
+                    carregar();
+                    estado_ = EstadoJogo::Jogando;
+                }
+            }
+            return;
 
-        default: break;  // Tecla desconhecida — ignora, não faz nada
+        case EstadoJogo::Morto:
+            estado_ = EstadoJogo::Menu;
+            return;
+
+        case EstadoJogo::Historico:
+            if (key == 27 || key == 'h' || key == 'H') {
+                estado_ = EstadoJogo::Jogando;
+            }
+            return;
+
+        case EstadoJogo::Jogando:
+            if (key == 27) { isRunning_ = false; return; }
+            if (key == 'S') { salvar();   return; }
+            if (key == 'L') { carregar(); return; }
+            if (key == 'h' || key == 'H') {
+                estado_ = EstadoJogo::Historico;
+                return;
+            }
+            key = static_cast<char>(tolower(key));
+            switch (key) {
+                case 'w': player_.move( 0, -1, map_, enemies_); break;
+                case 's': player_.move( 0,  1, map_, enemies_); break;
+                case 'a': player_.move(-1,  0, map_, enemies_); break;
+                case 'd': player_.move( 1,  0, map_, enemies_); break;
+                case 'g': coletarItem(); break;
+                case 'u': usarConsumivel(); break;
+                case 'i': inventarioAberto_ = !inventarioAberto_; break;
+                case '1': case '2': case '3': case '4': case '5':
+                    if (inventarioAberto_) usarConsumivelInventario(key - '1'); break;
+                case 'e': if (inventarioAberto_) equiparSelecionado(); break;
+                case 'x': if (inventarioAberto_) desequiparSelecionado(); break;
+                case 'r':
+                    if (inventarioAberto_) {
+                        char next = readKey();
+                        if (next >= '1' && next <= '5')
+                            descartarItem(next - '1');
+                    }
+                    break;
+                default: break;
+            }
+            
+            return;
     }
 }
 
@@ -326,13 +362,17 @@ void Game::update() {
     //limpar inimigos caso tenham morrido
     enemies_.erase(
         std::remove_if(enemies_.begin(), enemies_.end(),
-            [](const std::unique_ptr<Enemy>& e) { 
-                return !e->isAlive(); 
+            [this](const std::unique_ptr<Enemy>& e) { 
+                if (!e->isAlive()) {
+                    inimigosDestruidos_++;
+                    return true;
+                }
+                return false;
             }),
         enemies_.end()
     );
     if (!player_.isAlive()) {
-        isRunning_ = false;
+        estado_ = EstadoJogo::Morto;
     }
 
     if(player_.getX() == escada.x && 
@@ -342,17 +382,29 @@ void Game::update() {
 }
 
 void Game::render() {
-    renderer_.render(map_, player_, enemies_, items_ ,messageLog_, inventarioAberto_, andarAtual_);
+    switch (estado_) {
+        case EstadoJogo::Menu:
+            renderer_.renderMenu(SaveSystem::existeSave(SAVE_PATH));
+            break;
+        case EstadoJogo::Jogando:
+            renderer_.render(map_, player_, enemies_, items_, messageLog_, inventarioAberto_, andarAtual_);
+            break;
+        case EstadoJogo::Morto:
+            renderer_.renderTelaDerrota(andarAtual_, player_.getLevel(), player_.getXP(), inimigosDestruidos_);
+            break;
+        case EstadoJogo::Historico:
+            renderer_.renderHistorico(historicoLog_);
+            break;
+    }
 }
 
 void Game::pushMessage(const std::string& message) {
     if(messageLog_.size() == 3) messageLog_.pop_front();
     messageLog_.push_back(message);
+    historicoLog_.push_back(message);
 }
 
 void Game::salvar() {
-    static const std::string SAVE_PATH = "savegame.json";
-
     // ── Helpers de serialização (enum → string) ──────────────────────────────
     auto itemTipoStr = [](ItemType t) -> std::string {
         switch (t) {
@@ -454,8 +506,6 @@ void Game::salvar() {
 }
 
 void Game::carregar() {
-    static const std::string SAVE_PATH = "savegame.json";
-
     if (!SaveSystem::existeSave(SAVE_PATH)) {
         pushMessage("Nenhum save encontrado.");
         return;

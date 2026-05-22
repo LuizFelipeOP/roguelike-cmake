@@ -29,6 +29,11 @@ public:
     // Sem isso, deletar um Player* via Entity* causaria undefined behavior
     virtual ~Entity() = default;
 
+    // Move semantics explícitos — necessários porque o destrutor virtual
+    // suprime a geração implícita do move assignment em C++11/14.
+    Entity(Entity&&) = default;
+    Entity& operator=(Entity&&) = default;
+
     // update() — método puramente virtual (= 0)
     // Isso torna Entity uma classe abstrata: não pode ser instanciada diretamente.
     // Cada subclasse DEVE implementar sua própria versão.

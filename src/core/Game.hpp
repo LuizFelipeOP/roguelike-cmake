@@ -23,6 +23,14 @@
 #include "observers/StatsObserver.hpp"
 #include "observers/LogObserver.hpp"
 
+
+ enum class EstadoJogo { 
+    Menu, 
+    Jogando, 
+    Morto, 
+    Historico 
+};
+
 class Game {
 public:
     // Construtor: inicializa todos os subsistemas do jogo
@@ -49,6 +57,9 @@ private:
     LogObserver   logObserver_;
 
     int andarAtual_;
+    EstadoJogo estado_;
+    int inimigosDestruidos_;
+    std::vector<std::string> historicoLog_;
 
     // --- Etapas do loop ---
     // Separar em métodos privados deixa run() limpo e legível
@@ -74,4 +85,6 @@ protected:
     int    getAndarAtual()  const { return andarAtual_; }
     size_t getNumEnemies()  const { return enemies_.size(); }
     size_t getNumItems()    const { return items_.size(); }
+    EstadoJogo getEstado()            const { return estado_; }
+    int        getInimigosDestruidos() const { return inimigosDestruidos_; }
 };

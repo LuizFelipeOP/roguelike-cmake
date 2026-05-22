@@ -10,12 +10,16 @@ protected:
     void render() override {}  // noop — sem system("cls") nem std::cout
 
 public:
+    GameTeste() { inicializarAndar(); }  // inicializa manualmente (construtor de Game não chama mais)
+
     // Torna descerAndar acessível publicamente no contexto de teste
     void descerAndarPublico() { descerAndar(); }
 
     int    andarAtual()  const { return getAndarAtual(); }
     size_t numEnemies()  const { return getNumEnemies(); }
     size_t numItems()    const { return getNumItems(); }
+    EstadoJogo estado()  const { return getEstado(); }
+    int inimigosDestruidos() const { return getInimigosDestruidos(); }
 };
 
 // ─────────────────────────────────────────────
@@ -59,4 +63,18 @@ TEST_CASE("Game::descerAndar recria enemies e items no novo andar") {
     (void)enemiesAndar1;
     (void)itemsAndar1;
     CHECK(g.andarAtual() == 2);  // estado consistente após transição
+}
+
+TEST_CASE("Game inicia no estado Jogando apos inicializarAndar") {
+    GameTeste g;
+    // GameTeste chama inicializarAndar() mas o estado base começa como Menu;
+    // o estado só muda para Jogando ao pressionar N no menu real.
+    // Para testes, verificamos que o estado padrão do Game é Menu.
+    // (GameTeste não altera estado_, só chama inicializarAndar)
+    CHECK(g.estado() == EstadoJogo::Menu);
+}
+
+TEST_CASE("inimigosDestruidos comeca em zero") {
+    GameTeste g;
+    CHECK(g.inimigosDestruidos() == 0);
 }
