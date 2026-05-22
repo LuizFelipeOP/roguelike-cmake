@@ -20,6 +20,8 @@
 #include "items/Item.hpp"
 #include "items/Inventario.hpp"
 #include <deque>
+#include <vector>
+#include "ui/ConsoleFacade.hpp"
 
 class Renderer {
 public:
@@ -44,17 +46,14 @@ public:
     // renderiza UI de inventario
     void renderInventario(const Inventario& inv);
 
+    void renderMenu(bool temSave);
+    void renderTelaDerrota(int andar, int nivel, int xp, int inimigos);
+    void renderHistorico(const std::vector<std::string>& historico);
+
 private:
-    // clearScreen(): limpa o terminal antes de cada frame
-    // Técnica simples para animação no console
-    void clearScreen();
+    //faz o controle das cores do console 
+    ConsoleFacade console_;
 
     // Aplica cor no console baseada nos efeitos ativos do player
     void setCorEfeito(const std::vector<std::string>& nomes);
-
-    // Reseta a cor do console para o padrão (branco)
-    void resetarCor();
-
-    // Aplica cor no console baseada no nome de um efeito específico
-    void setCorPorNome(const std::string& nome);
 };
