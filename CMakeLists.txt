@@ -51,6 +51,23 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(nlohmann_json)
 
+FetchContent_Declare(
+  SDL2
+  GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+  GIT_TAG        release-2.30.3
+)
+FetchContent_Declare(
+  SDL2_image
+  GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git
+  GIT_TAG        release-2.8.2
+)
+FetchContent_Declare(
+  SDL2_ttf
+  GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git
+  GIT_TAG        release-2.22.0
+)
+FetchContent_MakeAvailable(SDL2 SDL2_image SDL2_ttf)
+
 # ─────────────────────────────────────────────
 # Executável principal
 # ─────────────────────────────────────────────
@@ -68,8 +85,45 @@ target_include_directories(roguelike PRIVATE src)
 
 # Linka nlohmann_json ao executável principal — isso expõe os headers da lib
 # Após esse target_link_libraries, você pode usar #include <nlohmann/json.hpp> em qualquer .cpp
-target_link_libraries(roguelike PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(roguelike PRIVATE
+    nlohmann_json::nlohmann_json
+    SDL2::SDL2
+    SDL2::SDL2main
+    SDL2_image::SDL2_image
+    SDL2_ttf::SDL2_ttf
+)
 
+# Macro que habilita o código SDL dentro de Game.cpp (não definido nos testes)
+target_compile_definitions(roguelike PRIVATE ROGUELIKE_SDL)
+
+# Copia DLLs do SDL2 para junto do executável após cada build
+add_custom_command(TARGET roguelike POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        $<TARGET_FILE:SDL2::SDL2>
+        $<TARGET_FILE:SDL2_image::SDL2_image>
+        $<TARGET_FILE:SDL2_ttf::SDL2_ttf>
+        $<TARGET_FILE_DIR:roguelike>
+)
+
+# Copia a pasta assets/ (fontes) para junto do executável após cada build
+add_custom_command(TARGET roguelike POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/assets
+        $<TARGET_FILE_DIR:roguelike>/assets
+)
+
+# Copia os spritesheets para build/Debug/assets/sprites/
+add_custom_command(TARGET roguelike POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory
+        $<TARGET_FILE_DIR:roguelike>/assets/sprites
+)
+foreach(SHEET Monsters Items Terrain Terrain_Objects Interface)
+    add_custom_command(TARGET roguelike POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${CMAKE_SOURCE_DIR}/src/sprites/${SHEET}.png
+            $<TARGET_FILE_DIR:roguelike>/assets/sprites/${SHEET}.png
+    )
+endforeach()
 # Runtime estático: embute as DLLs do MSVC no .exe
 # /MT em Release, /MTd em Debug — o .exe Release roda sem Visual Studio instalado
 if(MSVC)
@@ -83,10 +137,16 @@ endif()
 
 enable_testing()
 
-# Sources de produção reutilizadas nos testes — exclui main.cpp para evitar
-# conflito de ponto de entrada com o main gerado pelo doctest
+# Sources de produção reutilizadas nos testes — exclui:
+#   main.cpp        — conflito de ponto de entrada com o main do doctest
+#   SDLRenderer.cpp — depende de SDL2 (não linkado nos testes)
+#   TileAtlas.cpp   — depende de SDL2 (não linkado nos testes)
+#   SalaThema.cpp   — depende de SDL2 (não linkado nos testes)
 file(GLOB_RECURSE TEST_GAME_SOURCES "src/*.cpp")
 list(FILTER TEST_GAME_SOURCES EXCLUDE REGEX ".*main\\.cpp$")
+list(FILTER TEST_GAME_SOURCES EXCLUDE REGEX ".*SDLRenderer\\.cpp$")
+list(FILTER TEST_GAME_SOURCES EXCLUDE REGEX ".*TileAtlas\\.cpp$")
+list(FILTER TEST_GAME_SOURCES EXCLUDE REGEX ".*SalaThema\\.cpp$")
 
 # Arquivos de teste em tests/
 file(GLOB TEST_SOURCES "tests/*.cpp")

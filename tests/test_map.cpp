@@ -99,7 +99,7 @@ TEST_CASE("Map::getPosicaoEscada fica em tile '>' apos generate com 2+ salas") {
     }
 }
 
-TEST_CASE("Map::Fog of War - isExplored false antes de updateVisibility") {
+TEST_CASE("Map::Fog of War - isExplored false antes de calcularVisibilidade") {
     Map m(60, 22);
     m.generate(42);
     REQUIRE(m.getRooms().size() >= 1);
@@ -111,14 +111,31 @@ TEST_CASE("Map::Fog of War - isExplored false antes de updateVisibility") {
     }
 }
 
-TEST_CASE("Map::Fog of War - updateVisibility marca sala atual como explorada") {
+TEST_CASE("Map::Fog of War - calcularVisibilidade marca tiles no raio como explorados e visiveis") {
     Map m(60, 22);
     m.generate(42);
     REQUIRE(m.getRooms().size() >= 1);
     Point centro = m.getRooms().front().center();
-    m.updateVisibility(centro.x, centro.y);
-    // Centro da sala deve estar explorado agora
+    m.calcularVisibilidade(centro.x, centro.y);
+    // Centro deve estar explorado e visível
     CHECK(m.isExplored(centro.x, centro.y) == true);
+    CHECK(m.isVisible(centro.x, centro.y) == true);
+}
+
+TEST_CASE("Map::Fog of War - isVisible reseta apos nova calcularVisibilidade") {
+    Map m(60, 22);
+    m.generate(42);
+    REQUIRE(m.getRooms().size() >= 1);
+    Point centro = m.getRooms().front().center();
+    m.calcularVisibilidade(centro.x, centro.y);
+    CHECK(m.isVisible(centro.x, centro.y) == true);
+    // Move para posição muito distante — centro não deve mais ser visível
+    if (m.getRooms().size() > 1) {
+        Point outra = m.getRooms().back().center();
+        m.calcularVisibilidade(outra.x, outra.y, 1);
+        CHECK(m.isExplored(centro.x, centro.y) == true);  // explorado permanece
+        CHECK(m.isVisible(centro.x, centro.y) == false);  // mas não visível agora
+    }
 }
 
 TEST_CASE("Map::isExplored retorna false para coordenadas fora dos limites") {

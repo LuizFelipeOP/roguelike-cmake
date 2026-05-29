@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Calibrador de Sprites — Roguelike</title>
+<style>
+  * { box-sizing: border-box; }
+  body { background: #1a1a2e; color: #eee; font-family: monospace; margin: 20px; }
+  h1 { color: #e94560; margin-bottom: 4px; }
+  h2 { color: #a0c4ff; background: #16213e; padding: 8px 12px; margin: 32px 0 8px; }
+  h3 { color: #ffd166; margin: 20px 0 8px; }
+
+  /* ── Paleta ── */
+  .paleta-grid {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;
+  }
+  .swatch {
+    width: 36px; height: 36px; border-radius: 4px; cursor: pointer;
+    border: 2px solid transparent; transition: transform .1s, border-color .1s;
+    flex-shrink: 0;
+  }
+  .swatch:hover  { transform: scale(1.15); }
+  .swatch.ativo  { border-color: #fff; transform: scale(1.2); }
+  .cor-info {
+    background: #16213e; padding: 8px 14px; border-radius: 4px;
+    font-size: 13px; margin-bottom: 12px; min-height: 32px;
+  }
+  .cor-info span { color: #e94560; font-weight: bold; }
+
+  /* ── Grids de sprites ── */
+  .sheet-section { margin-bottom: 32px; }
+  .controls { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start; margin-bottom: 8px; }
+  .ctrl-group { background: #16213e; padding: 8px 12px; border-radius: 4px; }
+  .info-bar {
+    margin: 6px 0; font-size: 13px; background: #16213e;
+    padding: 6px 10px; border-radius: 4px; min-height: 28px;
+  }
+  .canvas-wrap { position: relative; display: inline-block; cursor: crosshair; }
+  canvas { image-rendering: pixelated; border: 1px solid #333; display: block; }
+
+  /* ── Mini-menu de associação ── */
+  #mini-menu {
+    position: fixed; background: #0f3460; border: 1px solid #e94560;
+    border-radius: 6px; padding: 10px; z-index: 999; display: none;
+    min-width: 160px; box-shadow: 0 4px 20px rgba(0,0,0,.6);
+  }
+  #mini-menu p  { margin: 0 0 6px; font-size: 12px; color: #aaa; }
+  #mini-menu button {
+    display: block; width: 100%; text-align: left; background: #16213e;
+    color: #eee; border: none; padding: 5px 8px; margin: 2px 0;
+    border-radius: 3px; cursor: pointer; font-family: monospace; font-size: 13px;
+  }
+  #mini-menu button:hover { background: #e94560; }
+  #mini-menu .cancelar { color: #888; margin-top: 6px; }
+
+  /* ── Preview de entidades ── */
+  .preview-grid {
+    display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px;
+  }
+  .preview-card {
+    background: #16213e; border-radius: 6px; padding: 10px 12px;
+    text-align: center; min-width: 80px;
+  }
+  .preview-card canvas { display: block; margin: 0 auto 6px; image-rendering: pixelated; }
+  .preview-card .nome  { font-size: 11px; color: #aaa; }
+  .preview-card .hex   { font-size: 11px; color: #ffd166; margin-top: 2px; }
+
+  /* ── Código gerado ── */
+  #codigo-output {
+    background: #0d1117; border: 1px solid #333; border-radius: 4px;
+    padding: 14px; font-size: 13px; white-space: pre; overflow-x: auto;
+    margin-top: 8px; color: #c9d1d9; display: none;
+  }
+  .btn {
+    background: #e94560; color: #fff; border: none; padding: 8px 18px;
+    border-radius: 4px; cursor: pointer; font-family: monospace; font-size: 13px;
+  }
+  .btn:hover { background: #c73652; }
+  .btn-secondary {
+    background: #16213e; color: #aaa; border: 1px solid #444;
+    padding: 8px 18px; border-radius: 4px; cursor: pointer;
+    font-family: monospace; font-size: 13px; margin-left: 8px;
+  }
+  .btn-secondary:hover { background: #1e2d4a; }
+  #copiado { color: #4caf50; margin-left: 10px; display: none; }
+</style>
+</head>
+<body>
+<h1>Calibrador de Sprites</h1>
+<p style="color:#888;margin-top:0">Coordenadas de tiles + calibrador de cores da paleta.</p>
+
+<!-- ══════════════════════════════════════════════════
+     SEÇÃO 1 — PALETA
+════════════════════════════════════════════════════ -->
+<h2>Paleta de Cores</h2>
+<div class="paleta-grid" id="paleta"></div>
+<div class="cor-info" id="cor-info">Clique em uma cor para selecioná-la como cor ativa.</div>
+
+<!-- ══════════════════════════════════════════════════
+     SEÇÃO 2 — SPRITESHEETS
+════════════════════════════════════════════════════ -->
+<h2>Spritesheets</h2>
+<p style="color:#888;font-size:13px">
+  Com uma cor ativa: clique em qualquer célula do grid para associar um TileID a essa cor.<br>
+  Sem cor ativa: clique para ver as coordenadas.
+</p>
+<div id="app"></div>
+
+<!-- Mini-menu de associação -->
+<div id="mini-menu">
+  <p>Associar cor a:</p>
+  <div id="mini-menu-btns"></div>
+  <button class="cancelar" id="mini-cancelar">✕ cancelar</button>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SEÇÃO 3 — PREVIEW DAS ENTIDADES
+════════════════════════════════════════════════════ -->
+<h2>Preview das Entidades</h2>
+<p style="color:#888;font-size:13px">Simulação de SDL_SetTextureColorMod — pixels brancos multiplicados pela cor escolhida.</p>
+<div class="preview-grid" id="preview-grid"></div>
+
+<!-- ══════════════════════════════════════════════════
+     SEÇÃO 4 — GERAR CÓDIGO C++
+════════════════════════════════════════════════════ -->
+<h2>Gerar Código C++</h2>
+<button class="btn" onclick="gerarCodigo()">Gerar</button>
+<button class="btn-secondary" onclick="copiarCodigo()">Copiar</button>
+<span id="copiado">copiado!</span>
+<div id="codigo-output"></div>
+
+<!-- ══════════════════════════════════════════════════
+     SCRIPT PRINCIPAL
+════════════════════════════════════════════════════ -->
+<script>
+// ── Dados ────────────────────────────────────────────────────────────────────
+
+const PALETA = [
+  '#cdbeac','#7b7d6a','#4e554e','#3e4938',
+  '#779758','#627c80','#416a5d','#31444a',
+  '#9a93b7','#7d5f6f','#3c3b4a','#212d40',
+  '#8b484a','#6a3425','#452f29','#c5a46b',
+  '#9f673e','#755129','#494129','#bf8d77',
+  '#7a5c54','#302b25','#221a0c','#080400',
+];
+
+const SHEETS = [
+  { name: 'Monsters.png', file: '../src/sprites/Monsters.png', tileW: 16, tileH: 24,
+    tiles: ['PLAYER','GOBLIN','ORC','TROLL'] },
+  { name: 'Terrain.png',  file: '../src/sprites/Terrain.png',  tileW: 16, tileH: 24,
+    tiles: ['PAREDE','CHAO','ESCADA'] },
+  { name: 'Items.png',    file: '../src/sprites/Items.png',    tileW: 16, tileH: 24,
+    tiles: ['ITEM_POCAO','ITEM_ESPADA','ITEM_ARMADURA','ITEM_AMULETO'] },
+  { name: 'Interface.png',    file: '../src/sprites/Interface.png',    tileW: 16, tileH: 24, tiles: [] },
+];
+
+// Coordenadas atuais dos tiles (reflete TileAtlas.cpp)
+const TILE_COORDS = {
+  PLAYER:        { sheetIdx: 0, col: 2,  row: 0  },
+  GOBLIN:        { sheetIdx: 0, col: 0,  row: 10 },
+  ORC:           { sheetIdx: 0, col: 15, row: 14 },
+  TROLL:         { sheetIdx: 0, col: 7,  row: 8  },
+  PAREDE:        { sheetIdx: 1, col: 0,  row: 3  },
+  CHAO:          { sheetIdx: 1, col: 13, row: 0  },
+  ESCADA:        { sheetIdx: 1, col: 14, row: 1  },
+  ITEM_POCAO:    { sheetIdx: 2, col: 0,  row: 3  },
+  ITEM_ESPADA:   { sheetIdx: 2, col: 0,  row: 0  },
+  ITEM_ARMADURA: { sheetIdx: 2, col: 0,  row: 2  },
+  ITEM_AMULETO:  { sheetIdx: 2, col: 10, row: 2  },
+};
+
+// Estado
+let corAtiva  = null;   // { hex, r, g, b } ou null
+const coresTile = {};   // TileID → { hex, r, g, b }
+const imgsCarregadas = [null, null, null]; // imagens por sheetIdx
+
+// ── Paleta ───────────────────────────────────────────────────────────────────
+
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return { r, g, b };
+}
+
+const paletaEl = document.getElementById('paleta');
+const corInfoEl = document.getElementById('cor-info');
+
+PALETA.forEach(hex => {
+  const sw = document.createElement('div');
+  sw.className = 'swatch';
+  sw.style.background = hex;
+  sw.title = hex;
+  sw.addEventListener('click', () => selecionarCor(hex, sw));
+  paletaEl.appendChild(sw);
+});
+
+function selecionarCor(hex, swEl) {
+  // Desseleciona se clicar na mesma
+  if (corAtiva && corAtiva.hex === hex) {
+    corAtiva = null;
+    document.querySelectorAll('.swatch').forEach(s => s.classList.remove('ativo'));
+    corInfoEl.innerHTML = 'Clique em uma cor para selecioná-la como cor ativa.';
+    return;
+  }
+  document.querySelectorAll('.swatch').forEach(s => s.classList.remove('ativo'));
+  swEl.classList.add('ativo');
+  const { r, g, b } = hexToRgb(hex);
+  corAtiva = { hex, r, g, b };
+  corInfoEl.innerHTML =
+    `Cor ativa: <span>${hex}</span> &nbsp;rgba(${r}, ${g}, ${b}, 1) &nbsp;—&nbsp;` +
+    `Clique em uma célula do grid para associar esta cor a um TileID.`;
+}
+
+// ── Mini-menu ────────────────────────────────────────────────────────────────
+
+const miniMenu    = document.getElementById('mini-menu');
+const miniBtns    = document.getElementById('mini-menu-btns');
+const miniCancelar = document.getElementById('mini-cancelar');
+
+miniCancelar.addEventListener('click', () => { miniMenu.style.display = 'none'; });
+document.addEventListener('click', e => {
+  if (!miniMenu.contains(e.target)) miniMenu.style.display = 'none';
+});
+
+function abrirMiniMenu(x, y, tiles, cor) {
+  miniBtns.innerHTML = '';
+  tiles.forEach(tile => {
+    const btn = document.createElement('button');
+    const corAtual = coresTile[tile];
+    btn.textContent = tile + (corAtual ? ` (${corAtual.hex})` : '');
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      associarCor(tile, cor);
+      miniMenu.style.display = 'none';
+    });
+    miniBtns.appendChild(btn);
+  });
+  miniMenu.style.left = (x + 8) + 'px';
+  miniMenu.style.top  = (y + 8) + 'px';
+  miniMenu.style.display = 'block';
+}
+
+function associarCor(tileID, cor) {
+  coresTile[tileID] = cor;
+  atualizarPreview(tileID);
+  // Redesenha grids para atualizar cor do highlight
+  document.querySelectorAll('[id^="canvas-"]').forEach(c => {
+    if (c._redraw) c._redraw();
+  });
+}
+
+// ── Grids de sprites ─────────────────────────────────────────────────────────
+
+const appEl = document.getElementById('app');
+
+SHEETS.forEach((sheet, idx) => {
+  const sec = document.createElement('div');
+  sec.className = 'sheet-section';
+  sec.innerHTML = `<h3>${sheet.name}</h3>`;
+
+  const ctrl = document.createElement('div');
+  ctrl.className = 'controls';
+  ctrl.innerHTML = `
+    <div class="ctrl-group">
+      <label>Zoom: <span id="zoom-val-${idx}">4x</span></label>
+      <input type="range" id="zoom-${idx}" min="1" max="8" value="4">
+    </div>`;
+
+  const infoBar = document.createElement('div');
+  infoBar.className = 'info-bar';
+  infoBar.id = `info-${idx}`;
+  infoBar.textContent = 'Clique em uma célula do grid para ver coordenadas ou associar cor.';
+
+  const wrap = document.createElement('div');
+  wrap.className = 'canvas-wrap';
+  const canvas = document.createElement('canvas');
+  canvas.id = `canvas-${idx}`;
+  wrap.appendChild(canvas);
+
+  sec.appendChild(ctrl);
+  sec.appendChild(infoBar);
+  sec.appendChild(wrap);
+  appEl.appendChild(sec);
+
+  const img = new Image();
+  img.src = sheet.file;
+  img.onload = () => {
+    imgsCarregadas[idx] = img;
+    let zoom = 4;
+    const tw = sheet.tileW, th = sheet.tileH;
+
+    function redraw() {
+      canvas.width  = img.width  * zoom;
+      canvas.height = img.height * zoom;
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      // grid
+      ctx.strokeStyle = 'rgba(255,255,0,0.2)';
+      ctx.lineWidth = 0.5;
+      const cols = Math.floor(img.width  / tw);
+      const rows = Math.floor(img.height / th);
+      for (let c = 0; c <= cols; c++) {
+        ctx.beginPath(); ctx.moveTo(c*tw*zoom,0); ctx.lineTo(c*tw*zoom,canvas.height); ctx.stroke();
+      }
+      for (let r = 0; r <= rows; r++) {
+        ctx.beginPath(); ctx.moveTo(0,r*th*zoom); ctx.lineTo(canvas.width,r*th*zoom); ctx.stroke();
+      }
+
+      // highlights por TileID
+      sheet.tiles.forEach(tileID => {
+        const coord = TILE_COORDS[tileID];
+        if (!coord || coord.sheetIdx !== idx) return;
+        const cor = coresTile[tileID];
+        // fundo colorido semi-transparente
+        ctx.fillStyle = cor ? hexToRgba(cor.hex, 0.45) : 'rgba(233,69,96,0.3)';
+        ctx.fillRect(coord.col*tw*zoom, coord.row*th*zoom, tw*zoom, th*zoom);
+        // borda
+        ctx.strokeStyle = cor ? cor.hex : '#e94560';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(coord.col*tw*zoom, coord.row*th*zoom, tw*zoom, th*zoom);
+        // label
+        ctx.fillStyle = '#fff';
+        ctx.font = `${Math.max(6, zoom*1.5)}px monospace`;
+        const label = tileID.replace('ITEM_','');
+        ctx.fillText(label, coord.col*tw*zoom+2, coord.row*th*zoom+Math.max(8,zoom*2));
+      });
+    }
+
+    redraw();
+    canvas._redraw = redraw;
+
+    document.getElementById(`zoom-${idx}`).addEventListener('input', e => {
+      zoom = parseInt(e.target.value);
+      document.getElementById(`zoom-val-${idx}`).textContent = zoom + 'x';
+      redraw();
+    });
+
+    canvas.addEventListener('click', e => {
+      const rect = canvas.getBoundingClientRect();
+      const col = Math.floor((e.clientX - rect.left)  / (tw * zoom));
+      const row = Math.floor((e.clientY - rect.top)   / (th * zoom));
+      const info = document.getElementById(`info-${idx}`);
+      info.innerHTML = `Célula: <span style="color:#e94560">col=${col}, linha=${row}</span>` +
+        ` &nbsp;|&nbsp; fromGrid(${col}, ${row})` +
+        ` &nbsp;|&nbsp; px=(${col*tw}, ${row*th})`;
+
+      if (corAtiva) {
+        e.stopPropagation(); // impede document listener de fechar o menu imediatamente
+        abrirMiniMenu(e.clientX, e.clientY, sheet.tiles, { ...corAtiva });
+      }
+    });
+  };
+
+  img.onerror = () => {
+    sec.insertAdjacentHTML('beforeend',
+      `<p style="color:#e94560">❌ Arquivo não encontrado: <code>${sheet.file}</code></p>`);
+  };
+});
+
+// ── Preview das entidades ─────────────────────────────────────────────────────
+
+const previewGrid = document.getElementById('preview-grid');
+const previewCards = {};
+
+Object.keys(TILE_COORDS).forEach(tileID => {
+  const card = document.createElement('div');
+  card.className = 'preview-card';
+  const cv = document.createElement('canvas');
+  cv.width  = 48;  // 16 * 3
+  cv.height = 72;  // 24 * 3
+  card.appendChild(cv);
+  const nome = document.createElement('div');
+  nome.className = 'nome';
+  nome.textContent = tileID;
+  card.appendChild(nome);
+  const hexEl = document.createElement('div');
+  hexEl.className = 'hex';
+  hexEl.textContent = '—';
+  card.appendChild(hexEl);
+  previewGrid.appendChild(card);
+  previewCards[tileID] = { canvas: cv, hexEl };
+  // Tenta desenhar quando imagem carregar
+  setTimeout(() => atualizarPreview(tileID), 500);
+});
+
+function atualizarPreview(tileID) {
+  const pc = previewCards[tileID];
+  if (!pc) return;
+  const coord = TILE_COORDS[tileID];
+  const img   = imgsCarregadas[coord.sheetIdx];
+  const sheet = SHEETS[coord.sheetIdx];
+  const cor   = coresTile[tileID];
+  const ctx   = pc.canvas.getContext('2d');
+  const scale = 3;
+  const tw = sheet.tileW, th = sheet.tileH;
+
+  ctx.clearRect(0, 0, pc.canvas.width, pc.canvas.height);
+  ctx.fillStyle = '#0d0d1a';
+  ctx.fillRect(0, 0, pc.canvas.width, pc.canvas.height);
+
+  if (!img) return;
+
+  // Extrai o tile para canvas temporário
+  const tmp = document.createElement('canvas');
+  tmp.width  = tw;
+  tmp.height = th;
+  const tctx = tmp.getContext('2d');
+  tctx.drawImage(img, coord.col * tw, coord.row * th, tw, th, 0, 0, tw, th);
+
+  if (cor) {
+    // Aplica multiplicação de cor (simula SDL_SetTextureColorMod)
+    const pixels = tctx.getImageData(0, 0, tw, th);
+    const d = pixels.data;
+    const fr = cor.r / 255, fg = cor.g / 255, fb = cor.b / 255;
+    for (let i = 0; i < d.length; i += 4) {
+      d[i]   = Math.round(d[i]   * fr);
+      d[i+1] = Math.round(d[i+1] * fg);
+      d[i+2] = Math.round(d[i+2] * fb);
+    }
+    tctx.putImageData(pixels, 0, 0);
+    pc.hexEl.textContent = cor.hex;
+  } else {
+    pc.hexEl.textContent = '—';
+  }
+
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(tmp, 0, 0, tw * scale, th * scale);
+}
+
+// Redesenha todos os previews após as imagens carregarem
+window.addEventListener('load', () => {
+  setTimeout(() => Object.keys(TILE_COORDS).forEach(atualizarPreview), 800);
+});
+
+// ── Gerar código C++ ──────────────────────────────────────────────────────────
+
+const outputEl = document.getElementById('codigo-output');
+
+function gerarCodigo() {
+  const linhas = ['// Cores por TileID — colar em renderMapa() / desenharTile()\n'];
+  linhas.push('// Gerado por calibrate_sprites.html\n\n');
+
+  Object.keys(TILE_COORDS).forEach(tileID => {
+    const cor = coresTile[tileID];
+    if (cor) {
+      linhas.push(`// case TileID::${tileID.padEnd(14)}: r=${String(cor.r).padStart(3)}, g=${String(cor.g).padStart(3)}, b=${String(cor.b).padStart(3)}  // ${cor.hex}\n`);
+    } else {
+      linhas.push(`// case TileID::${tileID.padEnd(14)}: (sem cor definida)\n`);
+    }
+  });
+
+  outputEl.textContent = linhas.join('');
+  outputEl.style.display = 'block';
+}
+
+function copiarCodigo() {
+  if (!outputEl.textContent) gerarCodigo();
+  navigator.clipboard.writeText(outputEl.textContent).then(() => {
+    const el = document.getElementById('copiado');
+    el.style.display = 'inline';
+    setTimeout(() => { el.style.display = 'none'; }, 2000);
+  });
+}
+
+function hexToRgba(hex, alpha) {
+  const { r, g, b } = hexToRgb(hex);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+</script>
+</body>
+</html>

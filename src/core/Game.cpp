@@ -1,59 +1,46 @@
 // Game.cpp — Implementação do loop principal do jogo
 
 #include "core/Game.hpp"
+#ifdef ROGUELIKE_SDL
+#include <SDL.h>
+#include "ui/SDLRenderer.hpp"
+#endif
 #include <iostream>
-#include <ctime>    // time() — para seed aleatória baseada no relógio
+#include <ctime>
 #include <random>
 #include <vector>
 #include <memory>
 #include "entities/EnemyFactory.hpp"
-#include <algorithm> 
+#include <algorithm>
 #include "persistence/SaveSystem.hpp"
 #include "effects/VenenoEffect.hpp"
 #include "effects/ParalisiaEffect.hpp"
 #include "effects/RegeneracaoEffect.hpp"
 #include "effects/EnfraquecimentoEffect.hpp"
-
-#ifdef _WIN32
-    #include <conio.h>   // _getch() — lê tecla sem precisar apertar Enter (Windows)
-#else
-    #include <termios.h> // Para leitura de tecla sem Enter no Linux/Mac
-    #include <unistd.h>
-#endif
 #include <string>
 #include <deque>
-// Função auxiliar: lê uma tecla sem aguardar Enter
-// Encapsula a diferença entre Windows e Linux
+
 static const std::string SAVE_PATH = "savegame.json";
 
-static char readKey() {
-#ifdef _WIN32
-    return static_cast<char>(_getch());
-#else
-    // Modo "raw" no terminal Linux: desativa o buffer de linha
-    struct termios oldt, newt;
-    tcgetattr(STDIN_FILENO, &oldt);
-    newt = oldt;
-    newt.c_lflag &= ~(ICANON | ECHO);
-    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-    char ch = static_cast<char>(getchar());
-    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-    return ch;
-#endif
-}
-
-Game::Game()
+Game::Game(SDL_Renderer* sdlRenderer,
+     const std::string& spriteDir,
+     const std::string& fontPath)
     : isRunning_(true)
     , estado_(EstadoJogo::Menu)
     , inimigosDestruidos_(0)
     , historicoLog_()
-    , map_(60, 22)        // Mapa maior para caber mais salas
-    , player_(2, 2)       // Posição inicial fixa — será ajustada após generate()
-    , renderer_()
-    , enemies_()            //vetor de ponteiros de inimigos
+    , map_(60, 22)
+    , player_(2, 2)
+#ifdef ROGUELIKE_SDL
+    , renderer_(sdlRenderer ? new SDLRenderer(sdlRenderer, spriteDir, fontPath) : nullptr)
+#else
+    , renderer_(nullptr)
+#endif
+    , enemies_()
     , messageLog_()
     , items_()
     , inventarioAberto_(false)
+    , aguardandoDescarte_(false)
     , statsObserver_(player_.getInventario())
     , logObserver_(messageLog_)
     , andarAtual_(1)
@@ -69,24 +56,39 @@ Game::Game()
     // NÃO chama inicializarAndar() aqui — o andar só inicia ao escolher "Nova Partida"
 }
 
-void Game::run() {
-    while (isRunning_) {
-        render();
-        processInput();
-        if (estado_ == EstadoJogo::Jogando)
-            update();
-    }
-    std::cout << "\nAte a proxima aventura!\n";
+Game::~Game() {
+#ifdef ROGUELIKE_SDL
+    delete renderer_;
+#endif
 }
 
-void Game::processInput() {
-    char key = readKey();
+void Game::run() {
+#ifdef ROGUELIKE_SDL
+    while (isRunning_) {
+        SDL_Event evento;
+        while(SDL_PollEvent(&evento)){
+            if(evento.type == SDL_QUIT) { isRunning_ = false; break; }
+            if(evento.type == SDL_KEYDOWN)
+                processInput(evento.key.keysym.sym);
+        }
+        if (renderer_) renderer_->clear();
+        render();
+        if (renderer_) renderer_->present();
+        if (estado_ == EstadoJogo::Jogando)
+            update();
+        SDL_Delay(16);
+    }
+    std::cout << "\nAte a proxima aventura!\n";
+#endif
+}
 
+void Game::processInput(int key) {
+#ifdef ROGUELIKE_SDL
     switch (estado_) {
 
         case EstadoJogo::Menu:
-            if (key == 27) { isRunning_ = false; return; }
-            if (key == 'n' || key == 'N') {
+            if (key == SDLK_ESCAPE) { isRunning_ = false; return; }
+            if (key == SDLK_n) {
                 inimigosDestruidos_ = 0;
                 historicoLog_.clear();
                 messageLog_.clear();
@@ -104,7 +106,7 @@ void Game::processInput() {
                 inicializarAndar();
                 estado_ = EstadoJogo::Jogando;
             }
-            if (key == 'c' || key == 'C') {
+            if (key == SDLK_c) {
                 if (SaveSystem::existeSave(SAVE_PATH)) {
                     carregar();
                     estado_ = EstadoJogo::Jogando;
@@ -113,48 +115,52 @@ void Game::processInput() {
             return;
 
         case EstadoJogo::Morto:
-            estado_ = EstadoJogo::Menu;
+            if (key == SDLK_ESCAPE) { isRunning_ = false; return; }
+            if (key == SDLK_h) { estado_ = EstadoJogo::Historico; return; }
+            if (key == SDLK_m) { estado_ = EstadoJogo::Menu; return; }
             return;
-
         case EstadoJogo::Historico:
-            if (key == 27 || key == 'h' || key == 'H') {
-                estado_ = EstadoJogo::Jogando;
-            }
+            if (key == SDLK_ESCAPE || key == SDLK_h) { estado_ = EstadoJogo::Morto; return; }
             return;
 
         case EstadoJogo::Jogando:
             if (key == 27) { isRunning_ = false; return; }
-            if (key == 'S') { salvar();   return; }
-            if (key == 'L') { carregar(); return; }
-            if (key == 'h' || key == 'H') {
+            if (key == SDLK_s && SDL_GetModState() & KMOD_SHIFT) { 
+                salvar();   return; 
+            }
+            if (key == SDLK_l && SDL_GetModState() & KMOD_SHIFT) { 
+                carregar(); return; 
+            }
+            if (key == SDLK_h) {
                 estado_ = EstadoJogo::Historico;
                 return;
             }
             key = static_cast<char>(tolower(key));
             switch (key) {
-                case 'w': player_.move( 0, -1, map_, enemies_); break;
-                case 's': player_.move( 0,  1, map_, enemies_); break;
-                case 'a': player_.move(-1,  0, map_, enemies_); break;
-                case 'd': player_.move( 1,  0, map_, enemies_); break;
-                case 'g': coletarItem(); break;
-                case 'u': usarConsumivel(); break;
-                case 'i': inventarioAberto_ = !inventarioAberto_; break;
-                case '1': case '2': case '3': case '4': case '5':
-                    if (inventarioAberto_) usarConsumivelInventario(key - '1'); break;
-                case 'e': if (inventarioAberto_) equiparSelecionado(); break;
-                case 'x': if (inventarioAberto_) desequiparSelecionado(); break;
-                case 'r':
-                    if (inventarioAberto_) {
-                        char next = readKey();
-                        if (next >= '1' && next <= '5')
-                            descartarItem(next - '1');
+                case SDLK_w: player_.move( 0, -1, map_, enemies_); break;
+                case SDLK_s: player_.move( 0,  1, map_, enemies_); break;
+                case SDLK_a: player_.move(-1,  0, map_, enemies_); break;
+                case SDLK_d: player_.move( 1,  0, map_, enemies_); break;
+                case SDLK_g: coletarItem(); break;
+                case SDLK_u: usarConsumivel(); break;
+                case SDLK_i: inventarioAberto_ = !inventarioAberto_; break;
+                case SDLK_1: case SDLK_2: case SDLK_3: case SDLK_4: case SDLK_5:
+                    if (aguardandoDescarte_) {
+                        descartarItem(key - SDLK_1);
+                        aguardandoDescarte_ = false;
+                    } else if (inventarioAberto_) {
+                        usarConsumivelInventario(key - SDLK_1);
                     }
                     break;
+                case SDLK_e: if (inventarioAberto_) equiparSelecionado(); break;
+                case SDLK_x: if (inventarioAberto_) desequiparSelecionado(); break;
+                case SDLK_r: if (inventarioAberto_) { aguardandoDescarte_ = true; pushMessage("Pressione 1-5 para descartar."); } break;
                 default: break;
             }
             
             return;
     }
+#endif
 }
 
 void Game::inicializarAndar(){
@@ -175,7 +181,7 @@ void Game::inicializarAndar(){
         player_.setPosition(start.x, start.y);
 
         //inicializar a visualização do mapa antes do jogador dar o primeiro input
-        map_.updateVisibility(player_.getX(), player_.getY());
+        map_.calcularVisibilidade(player_.getX(), player_.getY());
         
 
         const std::vector rooms = map_.getRooms();
@@ -187,7 +193,7 @@ void Game::inicializarAndar(){
 
             //spam de enemy no centro da sala — probabilidade varia por andar
             EnemyType tipo = EnemyFactory::sortear(andarAtual_, rng);
-            enemies_.push_back(EnemyFactory::create(tipo, centroRoom.x, centroRoom.y, andarAtual_));
+            // enemies_.push_back(EnemyFactory::create(tipo, centroRoom.x, centroRoom.y, andarAtual_));
 
             //chance de um item spawnar
             if (chance(rng) < 0.7f) {
@@ -356,7 +362,7 @@ void Game::update() {
         }
     }
     //vialização do mapa pelo jogador
-    map_.updateVisibility(player_.getX(), player_.getY());
+    map_.calcularVisibilidade(player_.getX(), player_.getY());
 
 
     //limpar inimigos caso tenham morrido
@@ -382,20 +388,23 @@ void Game::update() {
 }
 
 void Game::render() {
+#ifdef ROGUELIKE_SDL
+    if (!renderer_) return;
     switch (estado_) {
         case EstadoJogo::Menu:
-            renderer_.renderMenu(SaveSystem::existeSave(SAVE_PATH));
+            renderer_->renderMenu(SaveSystem::existeSave(SAVE_PATH));
             break;
         case EstadoJogo::Jogando:
-            renderer_.render(map_, player_, enemies_, items_, messageLog_, inventarioAberto_, andarAtual_);
+            renderer_->render(map_, player_, enemies_, items_, messageLog_, inventarioAberto_, andarAtual_, &player_.getInventario());
             break;
         case EstadoJogo::Morto:
-            renderer_.renderTelaDerrota(andarAtual_, player_.getLevel(), player_.getXP(), inimigosDestruidos_);
+            renderer_->renderTelaDerrota(andarAtual_, player_.getLevel(), player_.getXP(), inimigosDestruidos_);
             break;
         case EstadoJogo::Historico:
-            renderer_.renderHistorico(historicoLog_);
+            renderer_->renderHistorico(historicoLog_);
             break;
     }
+#endif
 }
 
 void Game::pushMessage(const std::string& message) {

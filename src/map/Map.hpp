@@ -28,9 +28,19 @@ public:
     // Retorna a lista de salas geradas (útil para posicionar jogador/inimigos)
     const std::vector<Room>& getRooms() const;
 
+    // Estilo visual do andar (1–6) — determinado em generate()
+    int getEstilo() const;
+
+    // Variante de parede por posição (0–9) — usada para rachaduras aleatórias
+    int getWallVariant(int x, int y) const;
+
+    // Índice da sala que contém o tile (x,y), ou -1 se for corredor
+    int getRoomIndex(int x, int y) const;
+
     //metodos do Fog of war
     bool isExplored(int x, int y) const;
-    void updateVisibility(int px, int py);
+    bool isVisible(int x, int y)  const;
+    void calcularVisibilidade(int px, int py, int raio = 8);
     Point getPosicaoEscada() const;
     void desenharEscada(int x, int y);
 
@@ -44,6 +54,15 @@ private:
     std::vector<std::vector<char>> tiles_;
     std::vector<Room> rooms_;   // salas geradas pelo algoritmo
 
+    // Estilo visual do andar (1–6)
+    int estilo_;
+
+    // Variante aleatória por tile de parede (0–9), hash de posição + seed
+    std::vector<std::vector<int>> wallVariant_;
+
+    // Índice da sala que ocupa cada tile (-1 = corredor)
+    std::vector<std::vector<int>> roomOf_;
+
     // Preenche todo o mapa com '#' — chamado no início de generate()
     void fill(char tile);
 
@@ -56,8 +75,9 @@ private:
     void carveHorizontalCorridor(int x1, int x2, int y);
     void carveVerticalCorridor(int y1, int y2, int x);
 
-    //campo do Fog of war
+    //campos do Fog of war
     std::vector<std::vector<bool>> explored_;
+    std::vector<std::vector<bool>> visible_;
 
     //posição da escada gerada em generated()
     Point escada_;

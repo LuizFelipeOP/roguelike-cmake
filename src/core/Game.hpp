@@ -13,7 +13,6 @@
 
 #include "entities/Player.hpp"
 #include "map/Map.hpp"
-#include "ui/Renderer.hpp"
 #include <vector>
 #include <memory>
 #include "entities/EnemyFactory.hpp"
@@ -22,6 +21,11 @@
 #include "items/ItemFactory.hpp"
 #include "observers/StatsObserver.hpp"
 #include "observers/LogObserver.hpp"
+
+// Forward declaration — evita puxar SDL.h para os testes
+// SDLRenderer só é incluído no Game.cpp
+struct SDL_Renderer;
+class SDLRenderer;
 
 
  enum class EstadoJogo { 
@@ -34,11 +38,12 @@
 class Game {
 public:
     // Construtor: inicializa todos os subsistemas do jogo
-    Game();
+
+    Game(SDL_Renderer* sdlRenderer, const std::string& spriteDir, const std::string& fontPath);
+    ~Game();
 
     // run(): inicia e mantém o loop principal até o jogador sair
     void run();
-
 private:
     // --- Estado do jogo ---
     bool isRunning_;   // Controla se o loop deve continuar
@@ -48,11 +53,12 @@ private:
     // Isso é preferível à herança quando não há relação "é um"
     Map      map_;
     Player   player_;
-    Renderer renderer_;
+    SDLRenderer* renderer_;
     std::vector<std::unique_ptr<Enemy>> enemies_;
     std::deque<std::string> messageLog_;
     std::vector<std::unique_ptr<Item>> items_;
     bool inventarioAberto_;
+    bool aguardandoDescarte_;
     StatsObserver statsObserver_;
     LogObserver   logObserver_;
 
@@ -63,7 +69,7 @@ private:
 
     // --- Etapas do loop ---
     // Separar em métodos privados deixa run() limpo e legível
-    void processInput();    // Lê o teclado e decide o que fazer
+    void processInput(int key);    // Lê o teclado e decide o que fazer (int = SDL_Keycode sem incluir SDL.h)
     void update();          // Atualiza o estado do mundo (movimento, combate, etc.)
     void pushMessage(const std::string& message);   // Adiciona mensagens para usuarios
     void coletarItem();     //coleta item para inventario do  player  

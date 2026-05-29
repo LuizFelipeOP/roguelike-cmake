@@ -1,23 +1,24 @@
-// Map.cpp — Implementação do mapa com geração procedural
-
 #include "map/Map.hpp"
-#include <algorithm>  // std::min, std::max
+#include <algorithm>
 #include <vector>
+#include <cmath>
 
-// ============================================================
-//  Métodos da Fase 1 — seus, não mude
-// ============================================================
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 
 // constroi o mapa, onde temos y e x, onde os indices 0 e Max
 // são paredes (#) e o resto é chão '.'
 Map::Map(int width, int height)
-    : width_(width), height_(height) {
+    : width_(width), height_(height), estilo_(1) {
 
-    //inicializaçao de area total exploravel com '.'
     tiles_.assign(height, std::vector<char>(width, '.'));
-    
-    //inicializaçao de area explorada como tudo false
     explored_.assign(height, std::vector<bool>(width, false));
+    visible_.assign(height, std::vector<bool>(width, false));
+    wallVariant_.assign(height, std::vector<int>(width, 0));
+    roomOf_.assign(height, std::vector<int>(width, -1));
+
     for (int y = 0; y < height_; ++y) {
         for (int x = 0; x < width_; ++x) {
             if (x == 0 || x == width_ - 1 || y == 0 || y == height_ - 1) {
@@ -25,7 +26,6 @@ Map::Map(int width, int height)
             }
         }
     }
-    
 }
 
 // Checa se o chão é '.', faz checagem de bounds antes
@@ -104,9 +104,14 @@ void Map::generate(unsigned int seed) {
     fill('#');
     for (auto& row : explored_)
         std::fill(row.begin(), row.end(), false);
+    for (auto& row : visible_)
+        std::fill(row.begin(), row.end(), false);
+    for (auto& row : roomOf_)
+        std::fill(row.begin(), row.end(), -1);
 
-    //gerar sala espaço aleatorio para o jogo
-    std::mt19937 rng(seed);
+    // Estilo visual aleatório do andar (1–6)
+    std::mt19937 rng(seed_);
+    estilo_ = 1 + (static_cast<int>(rng() % 6));
     std::uniform_int_distribution<int> randW(4, 10);
     std::uniform_int_distribution<int> randH(3, 7);
     std::uniform_int_distribution<int> randX(1, width_  - 2);
@@ -166,31 +171,70 @@ void Map::generate(unsigned int seed) {
         rooms_.push_back(Room(width_/2 - 3, height_/2 - 2, 6, 4));
         carveRoom(rooms_.back());
     }
+
+    // ── Preencher roomOf_: marca chão e paredes ao redor de cada sala
+    // Estende o bounding box em 1 para incluir as paredes que cercam a sala,
+    // assim renderTileParede sabe qual thema usar nessas paredes.
+    for (int i = 0; i < static_cast<int>(rooms_.size()); ++i) {
+        const Room& r = rooms_[i];
+        for (int y = r.y - 1; y <= r.y + r.height; ++y)
+            for (int x = r.x - 1; x <= r.x + r.width; ++x)
+                if (y >= 0 && y < height_ && x >= 0 && x < width_)
+                    roomOf_[y][x] = i;
+    }
+
+    // ── Preencher wallVariant_: hash por posição + seed para variantes aleatórias
+    for (int y = 0; y < height_; ++y)
+        for (int x = 0; x < width_; ++x)
+            if (tiles_[y][x] == '#')
+                wallVariant_[y][x] = static_cast<int>(
+                    (seed_ ^ (static_cast<unsigned>(x) * 2654435761u)
+                            ^ (static_cast<unsigned>(y) * 2246822519u)) % 10
+                );
 }
-void Map::updateVisibility(int px, int py){
-    for(auto& room : rooms_){
-        if(room.contains(px, py)){
-            explored_[py][px] = true;
-            for (int y = room.y; y < room.y + room.height; ++y) {
-                for (int x = room.x; x < room.x + room.width; ++x) {
-                    explored_[y][x] = true;
-                }
-            }
-            
+// ─────────────────────────────────────────────────────────────────────────────
+// calcularVisibilidade — ray casting com linha de Bresenham
+//
+// Para cada ângulo de 0° a 360° (NUM_RAIOS raios), avança tile a tile a partir
+// do player. Cada tile atingido é marcado como visible_ e explored_.
+// Paredes bloqueiam o raio (são marcadas, mas param a propagação).
+// ─────────────────────────────────────────────────────────────────────────────
+void Map::calcularVisibilidade(int px, int py, int raio) {
+    // Zera visibilidade atual
+    for (auto& row : visible_)
+        std::fill(row.begin(), row.end(), false);
+
+    const int NUM_RAIOS = 360;
+    const double PASSO  = 2.0 * M_PI / NUM_RAIOS;
+
+    for (int i = 0; i < NUM_RAIOS; ++i) {
+        double angulo = i * PASSO;
+        double dx = std::cos(angulo);
+        double dy = std::sin(angulo);
+
+        double rx = static_cast<double>(px) + 0.5;
+        double ry = static_cast<double>(py) + 0.5;
+
+        for (int passo = 0; passo < raio; ++passo) {
+            int tx = static_cast<int>(rx);
+            int ty = static_cast<int>(ry);
+
+            if (tx < 0 || tx >= width_ || ty < 0 || ty >= height_) break;
+
+            visible_[ty][tx]  = true;
+            explored_[ty][tx] = true;
+
+            if (tiles_[ty][tx] == '#') break; // parede bloqueia
+
+            rx += dx;
+            ry += dy;
         }
     }
-    //explora o raio de ação, aumenta a visibilidade do fog of war
-    for (int dy = -2; dy <= 2; ++dy) {
-        for (int dx = -2; dx <= 2; ++dx) {
-            int novoRaioX = px + dx;
-            int novoRaioY = py + dy;
-            if (novoRaioX >= 0 && novoRaioX < width_ && novoRaioY >= 0 && novoRaioY < height_) {
-                if (isWalkable(novoRaioX, novoRaioY))
-                    explored_[novoRaioY][novoRaioX] = true;
-            }
-        }
-    }
-    
+}
+
+bool Map::isVisible(int x, int y) const {
+    if (x < 0 || x >= width_ || y < 0 || y >= height_) return false;
+    return visible_[y][x];
 }
 
 bool Map::isExplored(int x, int y) const {
@@ -220,4 +264,18 @@ void Map::setExplored(const std::vector<std::vector<bool>>& explored) {
 
 unsigned int Map::getSeed() const {
     return seed_;
+}
+
+int Map::getEstilo() const {
+    return estilo_;
+}
+
+int Map::getWallVariant(int x, int y) const {
+    if (x < 0 || x >= width_ || y < 0 || y >= height_) return 0;
+    return wallVariant_[y][x];
+}
+
+int Map::getRoomIndex(int x, int y) const {
+    if (x < 0 || x >= width_ || y < 0 || y >= height_) return -1;
+    return roomOf_[y][x];
 }

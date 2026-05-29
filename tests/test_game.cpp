@@ -10,7 +10,7 @@ protected:
     void render() override {}  // noop — sem system("cls") nem std::cout
 
 public:
-    GameTeste() { inicializarAndar(); }  // inicializa manualmente (construtor de Game não chama mais)
+    GameTeste() : Game(nullptr, "", "") { inicializarAndar(); }  // inicializa manualmente (construtor de Game não chama mais)
 
     // Torna descerAndar acessível publicamente no contexto de teste
     void descerAndarPublico() { descerAndar(); }
